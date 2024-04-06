@@ -38,7 +38,7 @@ public class Sample5ControllerTest {
 		Sample5Controller target = new Sample5Controller();
 		target.sample5();
 		ArgumentCaptor<String> loggerCaptor = ArgumentCaptor.forClass(String.class);
-		verify(mockLogger, atLeast(1)).error(loggerCaptor.capture());
+		verify(mockLogger, atLeast(1)).info(loggerCaptor.capture());
 		String argument = loggerCaptor.getValue();
 		System.out.println(argument);
 	}
@@ -48,7 +48,7 @@ public class Sample5ControllerTest {
 		Sample5Controller target = new Sample5Controller();
 		target.sample5();
 		ArgumentCaptor<String> loggerCaptor = ArgumentCaptor.forClass(String.class);
-		verify(mockLogger, atLeast(1)).error(loggerCaptor.capture());
+		verify(mockLogger, atLeast(1)).info(loggerCaptor.capture());
 		String argument = loggerCaptor.getValue();
 		System.out.println(argument);
 	}
