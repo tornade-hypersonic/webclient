@@ -15,6 +15,8 @@ import jakarta.inject.Inject;
  * 以下のURLでSample4Data2Validatorが実行される
  * 　http://localhost:8080/webclient-web/sample4/data2?item91=aaa&item92=bbb
  * 
+ * 1コントローラで複数のValidatorを使用する場合、@InitBinderにはDTOのBean名を定義する
+ * ValidatorのBean名ではない
  */
 @RestController
 public class Sample4Controller {

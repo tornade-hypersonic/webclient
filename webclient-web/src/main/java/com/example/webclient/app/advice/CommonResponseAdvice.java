@@ -18,6 +18,9 @@ public class CommonResponseAdvice implements ResponseBodyAdvice<Object> {
         return true;
     }
 
+    /**
+     * beforeBodyWrite()を実装することで、業務ロジック後の共通的な処理が行える。
+     */
     @Override
     public Object beforeBodyWrite(
     		Object body, MethodParameter returnType, MediaType selectedContentType,
