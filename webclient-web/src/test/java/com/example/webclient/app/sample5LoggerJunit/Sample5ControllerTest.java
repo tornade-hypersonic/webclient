@@ -19,6 +19,9 @@ public class Sample5ControllerTest {
 	@BeforeClass
 	public static void setupAll() {
 		System.out.println("setupAll");
+		/**
+		 * loggerは static final のため、BeforeClassで初期化が必要。
+		 */
 		mockStaticLoggerFactory = mockStatic(LoggerFactory.class);
 		mockLogger = Mockito.mock(Logger.class);
 		
