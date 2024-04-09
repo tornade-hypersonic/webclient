@@ -14,6 +14,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Sample5ControllerTestを改善して、System.currentTimeMillis()をモック化しようとしたが、
+ * Systemクラスは特別な事情でモック化できなかった。
+ * このクラスのテストを実行すると、その事情がわかる。
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class Sample5ControllerTest2 {
 
@@ -30,8 +35,6 @@ public class Sample5ControllerTest2 {
 		mockStaticLoggerFactory
 			.when(() -> LoggerFactory.getLogger(Sample5Controller.class))
 			.thenReturn(mockLogger);
-		
-
 	}
 
 	
