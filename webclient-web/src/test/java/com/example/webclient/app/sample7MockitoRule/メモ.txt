@@ -1,0 +1,18 @@
+以下の通りに順を追ってテストソースを作成し、Macchinettaのやろうとしていることを理解する
+・Spring-testを使用しないケース
+・Mockito.Ruleを使用する
+・MockMVCを使用する
+
+３つ目が最もきれいなソースと思われる
+
+
+
+Repositoryのテストケース
+■select
+　内部結合、外部結合、ソート、
+
+■insert
+　通常のinsert
+　insert ... into select
+　
+
