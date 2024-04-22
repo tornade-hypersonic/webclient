@@ -1,4 +1,4 @@
-package com.example.webclient.app.sample6TwoArgumentJunit;
+package com.example.webclient.app.sample6StaticTwoArgumentJunit;
 
 public class Sample6Static {
 

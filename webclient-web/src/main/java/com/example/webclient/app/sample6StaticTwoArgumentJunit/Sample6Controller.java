@@ -1,4 +1,4 @@
-package com.example.webclient.app.sample6TwoArgumentJunit;
+package com.example.webclient.app.sample6StaticTwoArgumentJunit;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
