@@ -5,12 +5,16 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 
 /**
  * staticメソッドの引数が2つ存在するケース
  * Answerで引数に応じた振る舞いを定義できるか、その中で引数をアサートする手法
- * ArgumentCaptorを使用したかったが、verify()が使用できなさそうだったので、あきらめた。。。
+ * ArgumentCaptorを使用したかったが、verify()が使用できなさそうだったので、あきらめた。。。→test()
+ * 
+ * staticでもverify()が使用できた。キャプチャも使用できた
+ * →test1()
  */
 public class Sample6ControllerTest {
 
@@ -36,7 +40,37 @@ public class Sample6ControllerTest {
 		Sample6Controller target = new Sample6Controller();
 		target.sample6();
 		
+		mockStaticSample6Static.close();
+		
 	}
 
+
+	@Test
+	public void test1() {
+		
+		String expectedItem1 = "val-item11";
+		String expectedItem2 = "val-item22";
+		
+		// モック化
+		MockedStatic<Sample6Static> mockStatic = mockStatic(Sample6Static.class);
+		mockStatic.when(() -> Sample6Static.aaa(any(), anyBoolean())).thenReturn("mock-result");
+		
+		// 実行
+		Sample6Controller target = new Sample6Controller();
+		String sample6 = target.sample6();
+		System.out.println(sample6);
+		
+		// キャプチャ
+		ArgumentCaptor<Sample6StaticParam> paramCaptor = ArgumentCaptor.forClass(Sample6StaticParam.class);
+		ArgumentCaptor<Boolean> boolcaptor = ArgumentCaptor.forClass(Boolean.class);
+		mockStatic.verify(() -> Sample6Static.aaa(paramCaptor.capture(), boolcaptor.capture()));
+		
+		// アサート
+		assertEquals(paramCaptor.getValue().getItem1(), expectedItem1);
+		assertEquals(paramCaptor.getValue().getItem2(), expectedItem2);
+		assertEquals(boolcaptor.getValue(), false);
+
+		mockStatic.close();
+	}
 	
 }

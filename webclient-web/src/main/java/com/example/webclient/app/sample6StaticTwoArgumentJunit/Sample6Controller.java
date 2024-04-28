@@ -12,8 +12,8 @@ public class Sample6Controller {
 		Sample6StaticParam param = new Sample6StaticParam();
 		param.setItem1("val-item11");
 		param.setItem2("val-item22");
-		Sample6Static.aaa(param, false);
-		return null;
+		String aaa = Sample6Static.aaa(param, false);
+		return aaa;
 	}
 	
 
