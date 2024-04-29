@@ -36,15 +36,25 @@ public class Sample4Controller {
 	}
 	
 	@GetMapping("/sample4/data1")
-	public void sample4Data1(@Validated Sample4Data1 sample4Data1) {
+	public Sample4Response1 sample4Data1(@Validated Sample4Data1 sample4Data1) {
 		System.out.println("Sample4Controller#sample4Data1()");
 		System.out.println("sample4Data1 item1=" + sample4Data1.getItem1());
+		
+		Sample4Response1 response1 = new Sample4Response1();
+		response1.setItem1Response(sample4Data1.getItem1() + " response!");
+		response1.setItem2Response(sample4Data1.getItem2() + " response!");
+		return response1;
 	}
 	
 	@GetMapping("/sample4/data2")
-	public void sample4Data2(@Validated Sample4Data2 sample4Data2) {
+	public Sample4Response2 sample4Data2(@Validated Sample4Data2 sample4Data2) {
 		System.out.println("Sample4Controller#sample4Data2()");
 		System.out.println("sample4Data2 item91=" + sample4Data2.getItem91());
+		
+		Sample4Response2 response2 = new Sample4Response2();
+		response2.setItem91Response(sample4Data2.getItem91() + " response!");
+		response2.setItem92Response(sample4Data2.getItem92() + " response!");
+		return response2;
 	}
 	
 }
