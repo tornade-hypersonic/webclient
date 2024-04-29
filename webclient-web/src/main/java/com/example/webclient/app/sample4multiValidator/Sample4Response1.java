@@ -1,4 +1,4 @@
-package com.example.webclient.app.sample4;
+package com.example.webclient.app.sample4multiValidator;
 
 public class Sample4Response1 {
 

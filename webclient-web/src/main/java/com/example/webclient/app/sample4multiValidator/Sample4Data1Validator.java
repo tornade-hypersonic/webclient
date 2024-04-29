@@ -1,4 +1,4 @@
-package com.example.webclient.app.sample4;
+package com.example.webclient.app.sample4multiValidator;
 
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;

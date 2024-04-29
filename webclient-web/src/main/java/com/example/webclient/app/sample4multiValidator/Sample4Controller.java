@@ -1,4 +1,4 @@
-package com.example.webclient.app.sample4;
+package com.example.webclient.app.sample4multiValidator;
 
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;

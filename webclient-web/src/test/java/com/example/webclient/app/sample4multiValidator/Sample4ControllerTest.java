@@ -1,4 +1,4 @@
-package com.example.webclient.app.sample4;
+package com.example.webclient.app.sample4multiValidator;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
@@ -12,6 +12,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import com.example.webclient.app.sample4multiValidator.Sample4Controller;
 
 import jakarta.inject.Inject;
 
