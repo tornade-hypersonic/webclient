@@ -88,12 +88,12 @@
             <artifactId>spring-test-dbunit</artifactId>
             <scope>test</scope>
         </dependency>
+        -->
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
             <scope>test</scope>
         </dependency>
-        -->
         <!-- == End Unit Test == -->
 
         <!-- == Begin Coding Support == -->

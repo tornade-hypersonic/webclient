@@ -1,0 +1,72 @@
+{
+  "telNo": "092-261-0001",
+  "bunkatsuNo": "2",
+  "contractName": "料金　太郎",
+  "updateDate": [2021, 12, 23, 11, 22, 33, 789000000],
+  "updateCnt": 3,
+  "testInt": 11,
+  "testLong": 21,
+  "testFloat": 31.1,
+  "addressList": [
+    {
+      "addressCode": "0110000002",
+      "zipNo": "888-0000",
+      "prefectures": "福岡県",
+      "city": "福岡市",
+      "bantigo": "南福岡"
+    },
+    {
+      "addressCode": "0110000001",
+      "zipNo": "888-9999",
+      "prefectures": "北海道",
+      "city": "札幌市",
+      "bantigo": "横浜町"
+    }
+  ],
+  "statusPulldown": { " ": " ", "001": "作業中", "009": "完了" },
+  "stringList": ["リストb", "リストa"],
+  "integerList": [51, 52],
+  "longList": [61, 62],
+  "floatList": [71.1, 72.2],
+  "arrayString": ["配列b", "配列a"],
+  "arrayAddress": [
+    {
+      "addressCode": "0110000002",
+      "zipNo": "888-0000",
+      "prefectures": "福岡県",
+      "city": "福岡市",
+      "bantigo": "南福岡"
+    },
+    {
+      "addressCode": "0110000001",
+      "zipNo": "888-9999",
+      "prefectures": "北海道",
+      "city": "札幌市",
+      "bantigo": "横浜町"
+    }
+  ],
+  "arrayInteger": [51, 52],
+  "arrayInt": [51, 52],
+  "arrayLongClass": [61, 62],
+  "arrayLong": [61, 62],
+  "arrayFloatClass": [71.1, 72.2],
+  "arrayFloat": [71.1, 72.2],
+  "serviceInfo": { "id": "101", "name": "サービス101" },
+  "haishi": "1",
+  "serviceInfo2": { "id": "131", "name": "サービス131" },
+  "address": {
+    "addressCode": "0110000002",
+    "zipNo": "888-0000",
+    "prefectures": "福岡県",
+    "city": "福岡市",
+    "bantigo": "南福岡"
+  },
+  "serviceInfoArrayLevel": [
+    { "id": "301", "name": "サービス301" },
+    { "id": "302", "name": "サービス302" }
+  ],
+  "serviceInfoListLevel": [
+    { "id": "401", "name": "サービス401" },
+    { "id": "402", "name": "サービス402" }
+  ]
+}
