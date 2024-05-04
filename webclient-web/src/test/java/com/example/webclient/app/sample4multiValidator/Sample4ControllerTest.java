@@ -13,8 +13,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import com.example.webclient.app.sample4multiValidator.Sample4Controller;
-
 import jakarta.inject.Inject;
 
 /**
