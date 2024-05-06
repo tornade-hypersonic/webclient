@@ -22,13 +22,21 @@ public class TryReadJson {
 		String readString = Files.readString(Paths.get("src/test/java/junithelper/z_contractdto.json"));
 		System.out.println(readString);
 		
+		// JacksonによるDTO生成
 		ObjectMapper mapper = new ObjectMapper();
 		JavaTimeModule jtm = new JavaTimeModule();
 		mapper.registerModule(jtm);	
 		ContractDto dto = mapper.readValue(readString, ContractDto.class);
 		System.out.println(dto);
 		
+		// TODO マップからDTO生成 →やり方がわからない。。。
+//		ObjectMapper mapperForMap = new ObjectMapper();
+//		Map<String, Object> map = mapperForMap.readValue(readString, new TypeReference<Map<String, Object>>(){});
+//		ContractDto contractDtoForMap = new ContractDto();
+//		BeanUtils.populate(contractDtoForMap, map);
+//		ContractDto contractDtoForMap = ContractMapper.INSTANCE.mapContract(map);
 		
+		// JunitHelperによるDTO生成
 		JunitDtoHelper helper = new JunitDtoHelper();
 		Map<String, Map<String, Map<String, Object>>> dtos =
 				helper.createDtoFromExcel("data/test/ContractDto.xlsx");
@@ -38,8 +46,12 @@ public class TryReadJson {
 		
 		System.out.println("■" + dto);
 		System.out.println("■" + contractDto1);
+//		System.out.println("■" + contractDtoForMap);
+
+		// TODO アサート案１
 //		assertThat(dto, samePropertyValuesAs(contractDto1));
 		
+		// TODO アサート案２
 //        ContractDto deserializedObj1 = deserialize(serialize(dto));
 //        ContractDto deserializedObj2 = deserialize(serialize(contractDto1));
 //        Assert.assertEquals(deserializedObj1, deserializedObj2);
