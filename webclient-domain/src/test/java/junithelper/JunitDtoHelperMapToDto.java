@@ -19,6 +19,8 @@ public class JunitDtoHelperMapToDto {
 	private static String ANOTHER_SHEET_REGEX = "\\[(.*)\\]\\[(.*)\\]\\[(.*)\\]";
 	private static Pattern CELL_ANOTHER_SHEET = Pattern.compile(ANOTHER_SHEET_REGEX);
 	private static Pattern CELL_LIST_TYPE = Pattern.compile(".*<(.*)>");
+	
+	private JsonBuilder json = new JsonBuilder();
 
 	public static void main(String[] args) {
 		try {
@@ -127,11 +129,10 @@ public class JunitDtoHelperMapToDto {
 
 				    // DTOを作成する
 			    	Object dto = Utils.newInstance(dtoInfo.getClassName());
-				    dtosTubanMap.put(tubanEntry.getKey(), dto);
+//				    dtosTubanMap.put(tubanEntry.getKey(), dto);
 
 				    // Field情報をロード
 				    Map<String,Field> classFiledMap = ClassUtils.loadFiled(dtoInfo.getClassName());
-				    StringBuilder json = new StringBuilder();
 
 			    	// Mapを定義したシートの場合、Map固有の設定処理を行う
 				    if (dto instanceof Map) {
@@ -139,16 +140,12 @@ public class JunitDtoHelperMapToDto {
 				    	continue;
 				    }
 
-//			    	// 連番でループ
-//			    	for (List<Cell> cells : tubanEntry.getValue()) {
-//
-//					    // Excelの値をDTOに設定する
-//					    setValue(dtoAll, sheetMap, fields, cells, json, classFiledMap);
-//					}
 				    // Excelの値をDTOに設定する
-				    setValue(dtoAll, sheetMap, fields, json, classFiledMap, tubanEntry.getValue());
+				    setValue(dtoAll, sheetMap, fields, classFiledMap, tubanEntry.getValue(), 0);
 			    	
-			    	System.out.println("★JSON★" + json.toString());
+				    dtosTubanMap.put(tubanEntry.getKey(), json.toJson());
+			    	System.out.println("★JSON★" + json.toJson());
+			    	json.clear();
 			    }
 		    }
 		} catch (Exception e) {
@@ -186,13 +183,12 @@ public class JunitDtoHelperMapToDto {
 			Map<String, Map<String, Map<String, Object>>> dtoAll,
 			Map<String, DtoExcelSheet> sheetMap,
 			List<DtoFieldInfo> fields,
-//			List<Cell> cells,
-			StringBuilder json,
 			Map<String,Field> classFiledMap,
-			List<List<Cell>> renbanList
+			List<List<Cell>> renbanList,
+			int currentLevel
 			) {
 		
-	    json.append("{").append("\n");
+	    json.appendOpen(currentLevel);
 	    
 		List<Cell> cells = renbanList.get(0);
 
@@ -215,13 +211,14 @@ public class JunitDtoHelperMapToDto {
 		    // 階層レベルが下がった場合、スタックからDTOを一つ削除する
 		    if (preLevel > level) {
 		    	classFiledMapStack.pop();
-		    	json.append(headspace(level)).append("}\n");
+		    	json.appendClose(level);
 		    }
 
 		    // 設定対象のField
 		    Map<String, Field> currentClassFiledMap = classFiledMapStack.peek();
 			Field field = currentClassFiledMap.get(fieldInfo.getFieldName());
 			if (field == null) {
+				System.out.println(json.toJson());
 				throw new RuntimeException(String.format("field==null, i=%s, name=%s", itemIndex, fieldInfo.getFieldName()));
 			}
 
@@ -234,8 +231,14 @@ public class JunitDtoHelperMapToDto {
 				// TODO 保留
 		    	
 		    } else if (field.getType().isArray()) {
-				// TODO 保留
-		    	appendAssociativeArray(field, json, level);
+				// TODO 配列の場合
+            	// 親階層のJSON編集
+		    	json.appendAssociativeArray(field, level);
+            	// 子階層のJSON編集
+		        int assertLineCount = appendRenbanItems(
+		        		dtoAll, sheetMap, fieldInfo, fields, field, renbanList, itemIndex);
+		        // 子階層の行数をスキップ
+		    	itemIndex = itemIndex + assertLineCount;
 				
             } else if (List.class.isAssignableFrom(field.getType())) {
 				// TODO 保留
@@ -245,20 +248,19 @@ public class JunitDtoHelperMapToDto {
 				
             } else if ("[new]".equals(cellValue)) {
 				// DTOの場合
-            	appendAssociativeArray(field, json, level);
             	
-			    Map<String,Field> classFiledMapChild = ClassUtils.loadFiledByField(field);
-//		        classFiledMapStack.push(classFiledMapChild);
-		        
+            	// 親階層のJSON編集
+		    	json.appendAssociativeArray(field, level);
+            	// 子階層のJSON編集
 		        int assertLineCount = appendRenbanItems(
-		        		dtoAll, sheetMap, fieldInfo, fields, json, classFiledMapChild, renbanList, itemIndex);
-		        
+		        		dtoAll, sheetMap, fieldInfo, fields, field, renbanList, itemIndex);
+		        // 子階層の行数をスキップ
 		    	itemIndex = itemIndex + assertLineCount;
 		        
     		    	
 			} else {
 				System.out.println("通常\t" + field.getName() + "\t" + field.getType());
-				appendValue(field, cell, json, level);
+				json.appendValue(field, cell, level);
 			}
 			
 		    // 階層レベルを前回分として保持
@@ -266,61 +268,38 @@ public class JunitDtoHelperMapToDto {
 
 		}
 
-		json.append("}").append("\n");
+		json.appendClose(preLevel - 1);
 	}
 
-	private void appendAssociativeArray(Field field, StringBuilder json, int level) {
-		
-		json.append(headspace(level)).append("\"").append(field.getName()).append("\"")
-			.append(": ")
-			.append("\n");
-	}
-
-	private void appendArray(Field field, StringBuilder json, int level) {
-		
-		json.append(headspace(level)).append("\"").append(field.getName()).append("\"")
-			.append(": ")
-			.append("\n");
-	}
-
-	private void appendValue(Field field, Cell cell, StringBuilder json, int level) {
-		
-		String value = ExcelUtils.getExcelValue(cell);
-		
-		json.append(headspace(level)).append("\"").append(field.getName()).append("\"")
-			.append(": ")
-			.append("\"").append(value).append("\",")
-			.append("\n");
-	}
-	
+	/**
+	 * DTO配列として連番で定義された値を追加する。
+	 * 例）
+	 *   serviceInfoArrayLevel | junithelper.ServiceInfo[] | 1 |             | 
+	 *   id                    | java.lang.String          | 2 | 301         | 302
+	 *   name                  | java.lang.String          | 2 | サービス301 | サービス302
+	 * このidとnameの連番で定義された値をJSONに追加する
+	 * 手順としては、
+	 *  1. cellsから id,name の値のみを抜き出した wCells を生成する
+	 *  2. renbanListを一つのみ設定した wRenbanList を生成する
+	 *  3. 再帰処理を利用して setValue()を呼び出す
+	 *     再帰処理内では、id,name のみがJSONに追加される
+	 *  4. 1～3をrenbanListの分だけ実行する
+	 *     これにより、301,サービス301、302,サービス302 が追加される
+	 *  注意）
+	 *     id,name はこのメソッドで追加したため、id,nameはスキップする必要がある
+	 *     スキップする行数を返却し、呼び出し元でスキップする
+	 */
 	private int appendRenbanItems(
 			Map<String, Map<String, Map<String, Object>>> dtoAll,
 			Map<String, DtoExcelSheet> sheetMap,
 			DtoFieldInfo fieldInfo,
 			List<DtoFieldInfo> fields,
-			StringBuilder json,
-			Map<String,Field> classFiledMap,
+			Field field,
 			List<List<Cell>> renbanList,
 			int itemIndex) {
 		
-		/**
-		 * DTO配列として連番で定義された値を追加する。
-		 * 例）
-		 *   serviceInfoArrayLevel | junithelper.ServiceInfo[] | 1 |             | 
-		 *   id                    | java.lang.String          | 2 | 301         | 302
-		 *   name                  | java.lang.String          | 2 | サービス301 | サービス302
-		 * このidとnameの連番で定義された値をJSONに追加する
-		 * 手順としては、
-		 *  1. cellsから id,name の値のみを抜き出した wCells を生成する
-		 *  2. renbanListを一つのみ設定した wRenbanList を生成する
-		 *  3. 再帰処理を利用して setValue()を呼び出す
-		 *     再帰処理内では、id,name のみがJSONに追加される
-		 *  4. 1～3をrenbanListの分だけ実行する
-		 *     これにより、301,サービス301、302,サービス302 が追加される
-		 *  注意）
-		 *     id,name はこのメソッドで追加したため、id,nameはスキップする必要がある
-		 *     スキップする行数を返却し、呼び出し元でスキップする
-		 */
+	    Map<String,Field> classFiledMap = ClassUtils.loadFiledByField(field);
+		
 		
 		// JSON追加の対象数
 		int appendLineCount = 0;
@@ -328,11 +307,11 @@ public class JunitDtoHelperMapToDto {
 	    // 親の階層レベルを取得
 	    // ここに到達するのは、親の階層
 	    int parentLevel = fieldInfo.getLevel();
-	    int childLevel = parentLevel + 1;
 
 	    List<DtoFieldInfo> wFields = new ArrayList<>();
 	    List<List<Cell>> wRenbanList = new ArrayList<>();
 	    
+	    // 連番でループ
 	    for (int renbanCnt = 0; renbanCnt < renbanList.size(); renbanCnt++) {
 	    	List<Cell> cells = renbanList.get(renbanCnt);
 	    	
@@ -348,7 +327,8 @@ public class JunitDtoHelperMapToDto {
 		    // 親階層はスキップするので、itemIndexの次からスタートする
 		    for (int i = itemIndex + 1; i < fields.size(); i++) {
 		    	DtoFieldInfo dtoFieldInfo = fields.get(i);
-		    	if (childLevel != dtoFieldInfo.getLevel()) {
+		    	if (parentLevel == dtoFieldInfo.getLevel()) {
+		    		// 親階層と同じレベルの場合、子階層終了とみなす
 		    		break;
 		    	}
 		    	if (first) {
@@ -360,20 +340,12 @@ public class JunitDtoHelperMapToDto {
 		    wRenbanList.add(wCells);
 		    appendLineCount = wCells.size();
 	    	
-		    setValue(dtoAll, sheetMap, wFields, json, classFiledMap, wRenbanList);
-		    
+		    // 値の設定処理
+		    setValue(dtoAll, sheetMap, wFields, classFiledMap, wRenbanList, parentLevel);
 		    
 		    wRenbanList.clear();
 	    }
 	    return appendLineCount;
 	}
 
-	
-	private String headspace(int level) {
-		StringBuilder space = new StringBuilder();
-		for (int i = 0; i < level; i++) {
-			space.append("  ");
-		}
-		return space.toString();
-	}
 }
