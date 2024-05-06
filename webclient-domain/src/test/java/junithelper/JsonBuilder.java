@@ -130,6 +130,9 @@ public class JsonBuilder {
 	}
 	
 	public String toJson() {
+		if (json.charAt(json.length() - 1) == ',') {
+			json.deleteCharAt(json.length() - 1);
+		}
 		return json.toString();
 	}
 
