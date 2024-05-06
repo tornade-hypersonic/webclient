@@ -199,7 +199,6 @@ public class JunitDtoHelperMapToDto {
         classFiledMapStack.push(classFiledMap);
 
         for (int itemIndex = 0; itemIndex < cells.size(); itemIndex++) {
-			
 
 		    Cell cell = cells.get(itemIndex);
 		    String cellValue = ExcelUtils.getExcelValue(cell);
@@ -223,7 +222,7 @@ public class JunitDtoHelperMapToDto {
 			}
 
 		    // TODO 後で削除する
-		    if ("id".equals(fieldInfo.getFieldName())) {
+		    if ("serviceInfoArrayLevel".equals(fieldInfo.getFieldName())) {
 		    	System.out.println("デバッグ用");
 		    }
 
@@ -232,13 +231,18 @@ public class JunitDtoHelperMapToDto {
 		    	
 		    } else if (field.getType().isArray()) {
 				// TODO 配列の場合
-            	// 親階層のJSON編集
-		    	json.appendAssociativeArray(field, level);
-            	// 子階層のJSON編集
-		        int assertLineCount = appendRenbanItems(
-		        		dtoAll, sheetMap, fieldInfo, fields, field, renbanList, itemIndex);
-		        // 子階層の行数をスキップ
-		    	itemIndex = itemIndex + assertLineCount;
+		    	
+		    	// DTO配列の場合
+		    	if ("[new]".equals(cellValue)) {
+	            	// 親階層のJSON編集
+			    	json.appendAssociativeArray(field, level);
+	            	// 子階層のJSON編集
+			        int assertLineCount = appendRenbanItems(
+			        		dtoAll, sheetMap, fieldInfo, fields, field, renbanList, itemIndex, true);
+			        // 子階層の行数をスキップ
+			    	itemIndex = itemIndex + assertLineCount;
+		    	}
+		    	
 				
             } else if (List.class.isAssignableFrom(field.getType())) {
 				// TODO 保留
@@ -253,7 +257,7 @@ public class JunitDtoHelperMapToDto {
 		    	json.appendAssociativeArray(field, level);
             	// 子階層のJSON編集
 		        int assertLineCount = appendRenbanItems(
-		        		dtoAll, sheetMap, fieldInfo, fields, field, renbanList, itemIndex);
+		        		dtoAll, sheetMap, fieldInfo, fields, field, renbanList, itemIndex, false);
 		        // 子階層の行数をスキップ
 		    	itemIndex = itemIndex + assertLineCount;
 		        
@@ -296,10 +300,14 @@ public class JunitDtoHelperMapToDto {
 			List<DtoFieldInfo> fields,
 			Field field,
 			List<List<Cell>> renbanList,
-			int itemIndex) {
+			int itemIndex,
+			boolean isArray
+			) {
 		
-	    Map<String,Field> classFiledMap = ClassUtils.loadFiledByField(field);
-		
+	    Map<String,Field> classFiledMap = 
+	    		isArray ?
+    				ClassUtils.loadFiledByDtoArrayField(field) : 
+	    			ClassUtils.loadFiledByDtoField(field);
 		
 		// JSON追加の対象数
 		int appendLineCount = 0;
@@ -311,8 +319,13 @@ public class JunitDtoHelperMapToDto {
 	    List<DtoFieldInfo> wFields = new ArrayList<>();
 	    List<List<Cell>> wRenbanList = new ArrayList<>();
 	    
+	    if (isArray) {
+	    	json.appendOpenArray(parentLevel);
+	    }
+	    
 	    // 連番でループ
 	    for (int renbanCnt = 0; renbanCnt < renbanList.size(); renbanCnt++) {
+	    	
 	    	List<Cell> cells = renbanList.get(renbanCnt);
 	    	
 	    	// 親階層に [new] が設定されてない場合、その連番はスキップする
@@ -339,12 +352,16 @@ public class JunitDtoHelperMapToDto {
 		    first = false;
 		    wRenbanList.add(wCells);
 		    appendLineCount = wCells.size();
-	    	
+
 		    // 値の設定処理
 		    setValue(dtoAll, sheetMap, wFields, classFiledMap, wRenbanList, parentLevel);
-		    
+
 		    wRenbanList.clear();
 	    }
+	    if (isArray) {
+	    	json.appendCloseArray(parentLevel);
+	    }
+	    
 	    return appendLineCount;
 	}
 

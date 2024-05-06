@@ -40,8 +40,13 @@ public class ClassUtils {
 	 * ClassのFieldをロードする
 	 * @param classname
 	 */
-	public static Map<String, Field> loadFiledByField(Field field) {
+	public static Map<String, Field> loadFiledByDtoField(Field field) {
 		return ClassUtils.loadFiled(
 				field.getType().toString().split(" ", -1)[1]);
+	}
+	
+	public static Map<String, Field> loadFiledByDtoArrayField(Field field) {
+		return ClassUtils.loadFiled(
+				field.getType().getComponentType().getName());
 	}
 }

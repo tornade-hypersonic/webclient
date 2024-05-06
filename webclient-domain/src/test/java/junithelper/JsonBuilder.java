@@ -76,6 +76,15 @@ public class JsonBuilder {
 		return this;
 	}
 	
+	public JsonBuilder appendCloseArray(int level) {
+		json.deleteCharAt(json.length() - 1);
+//		json.append(kaigyo())
+//	    	.append(headspace(level))
+//		    .append("],");
+		json.append("],");
+		return this;
+	}
+	
 	/**
 	 * 連想配列をオープンする
 	 * 　・改行を追加
@@ -101,10 +110,11 @@ public class JsonBuilder {
 	}
 	
 	public JsonBuilder appendOpenArray(int level) {
-		if (json.length() != 0) {
-			json.append(kaigyo());
-		}
-		json.append(headspace(level)).append("[");
+//		if (json.length() != 0) {
+//			json.append(kaigyo());
+//		}
+//		json.append(headspace(level)).append("[");
+		json.append("[");
 		return this;
 	}
 	

@@ -32,7 +32,9 @@ public class DtoExcelCreater {
 			if (field.getType().isArray()) {
 				System.out.println("配列\t" + field.getName() + "\t" + 
 								field.getType().getSimpleName() + "\t" + 
-								field.getType().getComponentType().getSimpleName());
+								field.getType().getComponentType().getSimpleName() + "\t" + 
+								field.getType().getComponentType().getName()
+								);
 //				execute(Class.forName(field.getType().getComponentType().getTypeName()));
 				
             } else if (List.class.isAssignableFrom(field.getType())) {
