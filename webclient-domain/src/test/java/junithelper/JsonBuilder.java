@@ -13,6 +13,7 @@ import org.apache.poi.ss.usermodel.Cell;
 public class JsonBuilder {
 
 	private StringBuilder json = new StringBuilder();
+	private int indent = 0;
 	
 	public void clear() { 
 		json.setLength(0);
@@ -38,7 +39,8 @@ public class JsonBuilder {
 	public JsonBuilder appendValue(Field field, Cell cell, int level) {
 		String value = ExcelUtils.getExcelValue(cell);
 		json.append(kaigyo())
-		    .append(headspace(level))
+//		    .append(headspace(level))
+		    .append(headspace(indent + 1))
 		    .append("\"")
 		    .append(field.getName())
 		    .append("\"")
@@ -71,16 +73,14 @@ public class JsonBuilder {
 	public JsonBuilder appendClose(int level) {
 		json.deleteCharAt(json.length() - 1);
 		json.append(kaigyo())
-	    	.append(headspace(level))
+	    	.append(headspace(indent))
 		    .append("},");
+		indent--;
 		return this;
 	}
 	
 	public JsonBuilder appendCloseArray(int level) {
 		json.deleteCharAt(json.length() - 1);
-//		json.append(kaigyo())
-//	    	.append(headspace(level))
-//		    .append("],");
 		json.append("],");
 		return this;
 	}
@@ -105,27 +105,47 @@ public class JsonBuilder {
 		if (json.length() != 0) {
 			json.append(kaigyo());
 		}
-		json.append(headspace(level)).append("{");
+		json.append(headspace(indent)).append("{");
 		return this;
 	}
 	
 	public JsonBuilder appendOpenArray(int level) {
-//		if (json.length() != 0) {
-//			json.append(kaigyo());
-//		}
-//		json.append(headspace(level)).append("[");
 		json.append("[");
 		return this;
 	}
 	
 	public JsonBuilder appendAssociativeArray(Field field, int level) {
 		json.append(kaigyo())
-		    .append(headspace(level))
+		    .append(headspace(indent))
 		    .append("\"")
 		    .append(field.getName())
 		    .append("\"")
 			.append(" : ")
 			;
+		indent++;
+		return this;
+	}
+	
+	/**
+	 * 別シートで作成されたJSONは、連想配列形式として完結している状態である
+	 * 末尾にカンマが存在しないため、カンマを付与する
+	 */
+	public JsonBuilder appendAnotherSheet(String jsonString, int level) {
+		
+		if (jsonString == null) {
+			return this;
+		}
+		json.append(kaigyo())
+    		.append(headspace(indent));
+		
+		String[] split = jsonString.split(kaigyo(), -1);
+		for (String string : split) {
+			json.append(headspace(indent))
+	    		.append(string)
+	    		.append(kaigyo());
+		}
+		
+	    json.append(",");
 		return this;
 	}
 	
@@ -142,7 +162,7 @@ public class JsonBuilder {
 	
 	private String headspace(int level) {
 		StringBuilder space = new StringBuilder();
-		for (int i = 0; i < level; i++) {
+		for (int i = 0; i <= level; i++) {
 			space.append("  ");
 		}
 		return space.toString();
