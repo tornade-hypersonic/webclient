@@ -386,9 +386,6 @@ public class JunitDtoHelperMapToDto {
 
 		    wRenbanList.clear();
 	    }
-	    if (pattern.isArray()) {
-	    	json.appendCloseArray(parentLevel);
-	    }
 	    
 	    return appendLineCount;
 	}
