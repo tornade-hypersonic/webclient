@@ -132,7 +132,7 @@ public class JunitDtoHelperMapToDto {
 		    	// 通番でループ
 			    for (Iterator<Entry<String, List<List<Cell>>>> tubanIterator = tubanMap.entrySet().iterator();
 			    		tubanIterator.hasNext();) {
-
+			    	
 			    	Entry<String, List<List<Cell>>> tubanEntry = tubanIterator.next();
 
 				    // DTOを作成する
@@ -200,12 +200,9 @@ public class JunitDtoHelperMapToDto {
 			int currentLevel
 			) {
 		
-	    json.appendOpen(currentLevel);
-	    
 		List<Cell> cells = renbanList.get(0);
 
 		int preLevel = 1;	// 前回の階層レベル
-	    boolean openAssociative = false;
 	    
 		// 設定対象DTO格納スタック
         Deque<Map<String, Field>> classFiledMapStack = new ArrayDeque<>();
@@ -219,7 +216,6 @@ public class JunitDtoHelperMapToDto {
 		    // Java変数情報
 			DtoFieldInfo fieldInfo = fields.get(itemIndex);
 		    int level = fieldInfo.getLevel();
-	    	openAssociative = false;
 		    
 		    // 階層レベルが下がった場合、スタックからDTOを一つ削除する
 		    if (preLevel > level) {
@@ -258,7 +254,6 @@ public class JunitDtoHelperMapToDto {
 		    	if ("[new]".equals(cellValue)) {
 	            	// 親階層のJSON編集
 			    	json.appendAssociativeArray(field, level);
-			    	openAssociative = true;
 	            	// 子階層のJSON編集
 			        int assertLineCount = appendRenbanItems(
 			        		dtoAll, sheetMap, fieldInfo, fields, field, renbanList, itemIndex, PropertPattern.DTO_ARRAY);
@@ -289,7 +284,7 @@ public class JunitDtoHelperMapToDto {
 				// TODO 保留
 				
             } else if ("[new]".equals(cellValue)) {
-				// DTOの場合
+				// DTOの場合 TODO この処理に不具合がある！！！
             	
             	// 親階層のJSON編集
 		    	json.appendAssociativeArray(field, level);
@@ -309,8 +304,6 @@ public class JunitDtoHelperMapToDto {
 		    preLevel = level;
 
 		}
-
-		json.appendClose(preLevel - 1);
 	}
 
 	/**
@@ -355,7 +348,7 @@ public class JunitDtoHelperMapToDto {
 	    List<List<Cell>> wRenbanList = new ArrayList<>();
 	    
 	    if (pattern.isArray()) {
-	    	json.appendOpenArray(parentLevel);
+	    	json.appendOpenArray(field);
 	    }
 	    
 	    // 連番でループ
@@ -432,7 +425,7 @@ public class JunitDtoHelperMapToDto {
     	// createDtoFromSheet() でJSONがJsonHolderに格納されるので、
     	// そのJSONを取得し、JsonBuiderに追加する
     	String jsonString = jsonHolder.get(anotherSheetName, anotherTestNo, anotherTuban);
-    	json.appendAnotherSheet(jsonString, fieldInfo.getLevel());
+    	json.appendAnotherSheetMap(fieldInfo.getFieldClassName(), jsonString);
     	
 	}
 	

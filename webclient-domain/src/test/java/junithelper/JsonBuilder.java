@@ -1,6 +1,12 @@
 package junithelper;
 
 import java.lang.reflect.Field;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Cell;
 
@@ -12,11 +18,17 @@ import org.apache.poi.ss.usermodel.Cell;
  */
 public class JsonBuilder {
 
-	private StringBuilder json = new StringBuilder();
-	private int indent = 0;
+	private Map<String, Object> jsonMap = new LinkedHashMap<>();
+    private Deque<Map<String, Object>> stack = new ArrayDeque<>();
 	
-	public void clear() { 
-		json.setLength(0);
+	public JsonBuilder() {
+		clear();
+	}
+
+	public void clear() {
+		jsonMap = new LinkedHashMap<>();
+	    stack = new ArrayDeque<>();
+	    stack.push(jsonMap);
 	}
 
 	/**
@@ -37,18 +49,10 @@ public class JsonBuilder {
 	 * @return
 	 */
 	public JsonBuilder appendValue(Field field, Cell cell, int level) {
+		
+		Map<String,Object> map = stack.peek();
 		String value = ExcelUtils.getExcelValue(cell);
-		json.append(kaigyo())
-//		    .append(headspace(level))
-		    .append(headspace(indent + 1))
-		    .append("\"")
-		    .append(field.getName())
-		    .append("\"")
-			.append(" : ")
-			.append("\"")
-			.append(value)
-			.append("\",")
-			;
+		map.put(field.getName(), value);
 		return this;
 	}
 	
@@ -66,22 +70,19 @@ public class JsonBuilder {
 	 * 　　　"bantigo": "南福岡"
 	 * 　　　},
 	 * 
-	 * @param json
+	 * @param jsonMap
 	 * @param level
 	 * @return
 	 */
 	public JsonBuilder appendClose(int level) {
-		json.deleteCharAt(json.length() - 1);
-		json.append(kaigyo())
-	    	.append(headspace(indent))
-		    .append("},");
-		indent--;
+		// スタックから取り除く
+		stack.pop();
 		return this;
 	}
 	
 	public JsonBuilder appendCloseArray(int level) {
-		json.deleteCharAt(json.length() - 1);
-		json.append("],");
+//		jsonMap.deleteCharAt(jsonMap.length() - 1);
+//		jsonMap.append("],");
 		return this;
 	}
 	
@@ -101,28 +102,27 @@ public class JsonBuilder {
 	 * @param level
 	 * @return
 	 */
-	public JsonBuilder appendOpen(int level) {
-		if (json.length() != 0) {
-			json.append(kaigyo());
-		}
-		json.append(headspace(indent)).append("{");
-		return this;
-	}
+//	public JsonBuilder appendOpen(Field field) {
+//		Map<String, Object> map = stack.peek();
+//		map.put(field.getName(), new LinkedHashMap<>());
+//		return this;
+//	}
 	
-	public JsonBuilder appendOpenArray(int level) {
-		json.append("[");
+	public JsonBuilder appendOpenArray(Field field) {
+		Map<String, Object> map = stack.peek();
+		map.put(field.getName(), new ArrayList<>());
 		return this;
 	}
 	
 	public JsonBuilder appendAssociativeArray(Field field, int level) {
-		json.append(kaigyo())
-		    .append(headspace(indent))
-		    .append("\"")
-		    .append(field.getName())
-		    .append("\"")
-			.append(" : ")
-			;
-		indent++;
+		Map<String, Object> newMap = new LinkedHashMap<>();
+		
+		Map<String, Object> map = stack.peek();
+		if (map == null) {
+			System.out.println("debug appendAssociativeArray");
+		}
+		map.put(field.getName(), newMap);
+		stack.push(newMap);
 		return this;
 	}
 	
@@ -130,31 +130,108 @@ public class JsonBuilder {
 	 * 別シートで作成されたJSONは、連想配列形式として完結している状態である
 	 * 末尾にカンマが存在しないため、カンマを付与する
 	 */
-	public JsonBuilder appendAnotherSheet(String jsonString, int level) {
-		
-		if (jsonString == null) {
-			return this;
-		}
-		json.append(kaigyo())
-    		.append(headspace(indent));
-		
-		String[] split = jsonString.split(kaigyo(), -1);
-		for (String string : split) {
-			json.append(headspace(indent))
-	    		.append(string)
-	    		.append(kaigyo());
-		}
-		
-	    json.append(",");
+//	public JsonBuilder appendAnotherSheet(String jsonString, int level) {
+//
+//		Map<String,Object> map = stack.peek();
+//		map.put("", map);
+//		return this;
+//	}
+	
+	public JsonBuilder appendAnotherSheetMap(String name, String jsonString) {
+
+		Map<String,Object> map = stack.peek();
+		map.put(name, new JsonAnotherSheet(jsonString));
 		return this;
 	}
 	
 	public String toJson() {
-		if (json.charAt(json.length() - 1) == ',') {
-			json.deleteCharAt(json.length() - 1);
-		}
+		StringBuilder json = new StringBuilder();
+		toJsonMap(this.jsonMap, json, 0);
 		return json.toString();
 	}
+	
+	@SuppressWarnings("unchecked")
+	private void toJsonMap(Map<String, Object> map, StringBuilder json, int indent) {
+		
+		int _indent = indent;
+
+		if (json.length() != 0) {
+			json.append(kaigyo());
+		}
+		json.append(headspace(_indent))
+			.append("{");
+
+		++_indent;
+		
+		for(Map.Entry<String, Object> entry : map.entrySet()){
+			String key = entry.getKey();
+			Object value = entry.getValue();
+			
+			json.append(kaigyo())
+				.append(headspace(_indent))
+				.append("\"").append(key).append("\"").append(": ");
+			
+			if (value instanceof Map) {
+				toJsonMap((Map<String, Object>) value, json, _indent);
+				
+			} else if (value instanceof List) {
+				toJsonList((List<Object>) value, json, _indent);
+				
+			} else if (value instanceof JsonAnotherSheet) {
+				json.append(JsonAnotherSheet.class.cast(value).getJsonString());
+				
+			} else {
+				json.append("\"").append(value).append("\"");
+				
+			}
+			json.append(", ");
+		}		
+		
+		--_indent;
+		
+		json.deleteCharAt(json.length() - 2);
+		json.append(kaigyo())
+			.append(headspace(_indent))
+			.append("}");
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void toJsonList(List<Object> list, StringBuilder json, int indent) {
+		
+		int _indent = indent;
+		
+		json.append(kaigyo())
+			.append(headspace(_indent))
+			.append("[");
+
+		++_indent;
+		
+		for (Object value : list) {
+			
+			if (value instanceof Map) {
+				toJsonMap((Map<String, Object>) value, json, _indent);
+				
+			} else if (value instanceof List) {
+				toJsonList((List<Object>) value, json, _indent);
+				
+			} else if (value instanceof JsonAnotherSheet) {
+				json.append(JsonAnotherSheet.class.cast(value).getJsonString());
+				
+			} else {
+				json.append("\"").append(value).append("\"");
+			}
+			
+			json.append(",").append(kaigyo());
+		}
+		
+		--_indent;
+
+		json.deleteCharAt(json.length() - 2);
+		json.append(kaigyo())
+			.append(headspace(_indent))
+			.append("]");
+	}
+	
 
 	private String kaigyo() {
 		return "\n";
@@ -168,4 +245,13 @@ public class JsonBuilder {
 		return space.toString();
 	}
 	
+	private static class JsonAnotherSheet {
+		private String jsonString;
+		private JsonAnotherSheet(String jsonString) {
+			this.jsonString = jsonString;
+		}
+		private String getJsonString() {
+			return this.jsonString;
+		}
+	}
 }
