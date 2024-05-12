@@ -55,7 +55,7 @@ public class JsonBuilder {
 	/**
 	 * 連想配列を開始し、リストに追加
 	 */
-	public JsonBuilder startAssociativeArrayAddList(Field field) {
+	public JsonBuilder startAssociativeArrayAddList() {
 		
 		// 連想配列の追加
 		Map<String, Object> newMap = new LinkedHashMap<>();
@@ -84,13 +84,17 @@ public class JsonBuilder {
 	 * DTO配列を開始
 	 */
 	public JsonBuilder startDtoArray(Field field) {
+		return startDtoArray(field.getName());
+	}
+	
+	public JsonBuilder startDtoArray(String name) {
 
 		// DTO配列格納用のリスト
 		List<Object> list = new ArrayList<>();
 
 		// DTO配列格納用リストを親のMapに登録
 		Map<String, Object> map = mapStack.peek();
-		map.put(field.getName(), list);
+		map.put(name, list);
 		
 		listStack.push(list);
 		
@@ -114,7 +118,24 @@ public class JsonBuilder {
 		map.put(name, value);
 		return this;
 	}
-	
+
+	/**
+	 * 別シートで生成されたJSONを登録
+	 */
+	public JsonBuilder addAnotherSheetMap(String name, String jsonString) {
+		Map<String,Object> map = mapStack.peek();
+		map.put(name, new JsonAnotherSheet(jsonString));
+		return this;
+	}
+
+	public JsonBuilder addAnotherSheetList(String jsonString) {
+		// リストに追加
+		List<Object> list = listStack.peek();
+		list.add(new JsonAnotherSheet(jsonString));
+				
+		return this;
+	}
+
 	/**
 	 * 連想配列を終了
 	 */
@@ -133,16 +154,6 @@ public class JsonBuilder {
 		return this;
 	}
 
-	/**
-	 * 別シートで生成されたJSONを登録
-	 */
-	public JsonBuilder appendAnotherSheetMap(String name, String jsonString) {
-
-		Map<String,Object> map = mapStack.peek();
-		map.put(name, new JsonAnotherSheet(jsonString));
-		return this;
-	}
-	
 	/**
 	 * 登録された情報をJSON文字列へ変換
 	 */

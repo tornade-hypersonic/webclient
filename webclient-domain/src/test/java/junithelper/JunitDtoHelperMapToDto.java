@@ -211,6 +211,7 @@ public class JunitDtoHelperMapToDto {
 		    int level = fieldInfo.getLevel();
 		    
 		    // 階層レベルが下がった場合、スタックからDTOを一つ削除する
+		    // TODO不要かも
 		    if (preLevel > level) {
 		    	classFiledMapStack.pop();
 		    	json.closeAssociativeArray();
@@ -236,13 +237,14 @@ public class JunitDtoHelperMapToDto {
 					// TODO 配列の場合
 		    		
 			    } else if (List.class.isAssignableFrom(field.getType())) {
-					// TODO リストの場合
+					// リストの場合
+			    	appendAnotherDtoList(dtoAll, sheetMap, fieldInfo, renbanList, itemIndex);
 			    	
 			    } else if (Map.class.isAssignableFrom(field.getType())) {
 					// TODO Mapの場合
 			    	
 		    	} else {
-		    		appendAnotherDto(dtoAll, sheetMap, cell, fieldInfo);
+		    		appendAnotherDto(dtoAll, sheetMap, cell, fieldInfo, false);
 		    	}
 		    	
 		    } else if (field.getType().isArray()) {
@@ -367,7 +369,7 @@ public class JunitDtoHelperMapToDto {
 	    	
 		    if (pattern.isDtoArray()) {
 		    	// DTO配列の場合、連想配列をリストに登録
-		    	json.startAssociativeArrayAddList(field);
+		    	json.startAssociativeArrayAddList();
 		    }
 	    	
 			boolean first = true;
@@ -416,7 +418,8 @@ public class JunitDtoHelperMapToDto {
 			Map<String, Map<String, Map<String, Object>>> dtoAll,
 			Map<String, DtoExcelSheet> sheetMap,
 			Cell cell,
-			DtoFieldInfo fieldInfo) {
+			DtoFieldInfo fieldInfo,
+			boolean isList) {
 
     	// セルの値を取得
 	    String cellValue = ExcelUtils.getExcelValue(cell);
@@ -424,7 +427,9 @@ public class JunitDtoHelperMapToDto {
 	    // 別シート参照情報の解析
 	    Matcher matcher = CELL_ANOTHER_SHEET.matcher(cellValue);
 	    if (!matcher.find()) {
-	    	throw new CellOperationException("別シート参照の形式誤り", cell, cellValue);
+	    	// throw new CellOperationException("別シート参照の形式誤り", cell, cellValue);
+	    	// 設定値がないものとして、処理を終了する
+	    	return;
 	    }
 
     	// 解析結果から、シート名・試験No・通番の情報を取得する
@@ -439,9 +444,45 @@ public class JunitDtoHelperMapToDto {
     	// createDtoFromSheet() でJSONがJsonHolderに格納されるので、
     	// そのJSONを取得し、JsonBuiderに追加する
     	String jsonString = jsonHolder.get(anotherSheetName, anotherTestNo, anotherTuban);
-    	json.appendAnotherSheetMap(fieldInfo.getFieldName(), jsonString);
+    	
+    	if (isList) {
+    		json.addAnotherSheetList(jsonString);
+    	} else {
+        	json.addAnotherSheetMap(fieldInfo.getFieldName(), jsonString);
+    	}
     	
 	}
 	
+	/**
+	 * 別シートのJSONを取得する。
+	 * createDtoFromSheet()を再帰的に呼び出すため、未作成のシートであれば、ここで生成される
+	 **/
+	private void appendAnotherDtoList(
+			Map<String, Map<String, Map<String, Object>>> dtoAll,
+			Map<String, DtoExcelSheet> sheetMap,
+			DtoFieldInfo fieldInfo,
+			List<List<Cell>> renbanList,
+			int itemIndex
+			) {
+		
+		// DTO配列スタート
+		json.startDtoArray(fieldInfo.getFieldName());
+		
+	    // 連番でループ
+	    for (int renbanCnt = 0; renbanCnt < renbanList.size(); renbanCnt++) {
+	    	
+	    	List<Cell> cells = renbanList.get(renbanCnt);
+	    	
+	    	// 親階層に [new] が設定されてない場合、その連番はスキップする
+	    	Cell cell = cells.get(itemIndex);
+	    	
+		    // 値の設定処理
+			appendAnotherDto(dtoAll, sheetMap, cell, fieldInfo, true);
+
+	    }
+	 		
+		// DTO配列終了
+		json.closeDtoArray();
+	}
 	
 }
