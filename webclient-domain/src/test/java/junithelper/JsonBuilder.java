@@ -1,5 +1,6 @@
 package junithelper;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -22,13 +23,12 @@ public class JsonBuilder {
     private Deque<Map<String, Object>> mapStack;
     private Deque<List<Object>> listStack;
 	
+    // コンストラクタ
 	public JsonBuilder() {
 		clear();
 	}
 
-	/**
-	 * 初期化
-	 */
+	// 初期化
 	public void clear() {
 		jsonMap = new LinkedHashMap<>();
 	    mapStack = new ArrayDeque<>();
@@ -39,15 +39,19 @@ public class JsonBuilder {
 	/**
 	 * 連想配列を開始
 	 */
-	public JsonBuilder startAssociativeArray(Field field, int level) {
+	public JsonBuilder startAssociativeArray(Field field) {
+		return startAssociativeArray(field.getName());
+	}
+	public JsonBuilder startAssociativeArray(String name) {
 		
 		Map<String, Object> newMap = new LinkedHashMap<>();
 		
 		Map<String, Object> map = mapStack.peek();
 		if (map == null) {
 			System.out.println("debug appendAssociativeArray");
+			System.out.println(this.toJson());
 		}
-		map.put(field.getName(), newMap);
+		map.put(name, newMap);
 		mapStack.push(newMap);
 		return this;
 	}
@@ -309,7 +313,7 @@ public class JsonBuilder {
 	 * 別シートで作成したJSON文字列を保持するクラス
 	 * このクラスのみで使用する
 	 */
-	private static class JsonAnotherSheet {
+	private static class JsonAnotherSheet implements Serializable {
 		private String jsonString;
 		private JsonAnotherSheet(String jsonString) {
 			this.jsonString = jsonString;

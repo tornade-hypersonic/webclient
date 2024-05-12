@@ -241,7 +241,8 @@ public class JunitDtoHelperMapToDto {
 			    	appendAnotherDtoList(dtoAll, sheetMap, fieldInfo, renbanList, itemIndex);
 			    	
 			    } else if (Map.class.isAssignableFrom(field.getType())) {
-					// TODO Mapの場合
+					// Mapの場合
+					appendAnotherDto(dtoAll, sheetMap, cell, fieldInfo, false);
 			    	
 		    	} else {
 		    		appendAnotherDto(dtoAll, sheetMap, cell, fieldInfo, false);
@@ -287,7 +288,7 @@ public class JunitDtoHelperMapToDto {
 				// DTOの場合 TODO この処理に不具合がある！！！
             	
             	// 親階層のJSON編集
-		    	json.startAssociativeArray(field, level);
+		    	json.startAssociativeArray(field);
             	// 子階層のJSON編集
 		        int assertLineCount = appendRenbanItems(
 		        		dtoAll, sheetMap, fieldInfo, fields, field, renbanList, itemIndex, PropertPattern.DTO);
@@ -438,7 +439,11 @@ public class JunitDtoHelperMapToDto {
     	String anotherTuban = matcher.group(3);
     	if (!dtoAll.containsKey(anotherSheetName)) {
 	    	// 指定したシートのDTOがまだ生成されてない場合、生成する
+    		backupJsonBuilder();
+    		
 	    	createDtoFromSheet(dtoAll, sheetMap, anotherSheetName);
+	    	
+	    	restoreJsonBuilder();
     	}
     	
     	// createDtoFromSheet() でJSONがJsonHolderに格納されるので、
@@ -454,8 +459,7 @@ public class JunitDtoHelperMapToDto {
 	}
 	
 	/**
-	 * 別シートのJSONを取得する。
-	 * createDtoFromSheet()を再帰的に呼び出すため、未作成のシートであれば、ここで生成される
+	 * DTOリストの別シートのJSONを取得する。
 	 **/
 	private void appendAnotherDtoList(
 			Map<String, Map<String, Map<String, Object>>> dtoAll,
@@ -484,5 +488,23 @@ public class JunitDtoHelperMapToDto {
 		// DTO配列終了
 		json.closeDtoArray();
 	}
-	
+
+	/**
+	 * JsonBuilderオブジェクトを退避する。
+	 * 別シート参照時にクリアする必要があるが、別シート参照が終了すると、クリア前から再開する必要があるため。
+	 * 退避したオブジェクトは変更されることがないため、ディープコピーは行わない。
+	 */
+	private void backupJsonBuilder() {
+		JsonBuilderHolder.push(this.json);
+		this.json = new JsonBuilder();
+	}
+
+	/**
+	 * 退避したJsonBuilderオブジェクトをリストアする。
+	 */
+	private void restoreJsonBuilder() {
+		this.json = JsonBuilderHolder.peek();
+		JsonBuilderHolder.pop();
+	}
+
 }
