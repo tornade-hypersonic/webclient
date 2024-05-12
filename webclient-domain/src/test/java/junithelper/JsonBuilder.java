@@ -18,8 +18,9 @@ import org.apache.poi.ss.usermodel.Cell;
  */
 public class JsonBuilder {
 
-	private Map<String, Object> jsonMap = new LinkedHashMap<>();
-    private Deque<Map<String, Object>> stack = new ArrayDeque<>();
+	private Map<String, Object> jsonMap;
+    private Deque<Map<String, Object>> stack;
+    private Deque<List<Object>> listStack;
 	
 	public JsonBuilder() {
 		clear();
@@ -29,12 +30,14 @@ public class JsonBuilder {
 		jsonMap = new LinkedHashMap<>();
 	    stack = new ArrayDeque<>();
 	    stack.push(jsonMap);
+	    listStack = new ArrayDeque<>();
 	}
 
 	/**
 	 * 連想配列開始
 	 */
 	public JsonBuilder appendAssociativeArray(Field field, int level) {
+		
 		Map<String, Object> newMap = new LinkedHashMap<>();
 		
 		Map<String, Object> map = stack.peek();
@@ -46,12 +49,57 @@ public class JsonBuilder {
 		return this;
 	}
 
+	public JsonBuilder appendAssociativeArrayForList(Field field) {
+		
+		// 連想配列の追加
+		Map<String, Object> newMap = new LinkedHashMap<>();
+		stack.push(newMap);
+		
+		// リストに追加
+		List<Object> list = listStack.peek();
+		list.add(newMap);
+		
+		return this;
+	}
+	
 	/**
 	 * 配列開始
 	 */
+//	public JsonBuilder appendOpenArray(Field field) {
+//		Map<String, Object> map = stack.peek();
+//		map.put(field.getName(), new ArrayList<>());
+//		return this;
+//	}
 	public JsonBuilder appendOpenArray(Field field) {
 		Map<String, Object> map = stack.peek();
-		map.put(field.getName(), new ArrayList<>());
+		
+	    List<Object> _currentList = new ArrayList<>();
+		map.put(field.getName(), _currentList);
+		
+//		this.currentList = _currentList;
+
+		return this;
+	}
+	
+	public JsonBuilder appendOpenDtoArray(Field field) {
+
+		// DTO配列格納用のリスト
+		List<Object> list = new ArrayList<>();
+
+		// DTO配列格納用リストを親のMapに登録
+		Map<String, Object> map = stack.peek();
+		map.put(field.getName(), list);
+		
+		listStack.push(list);
+		
+//		// DTO格納用のMapを用意し、カレントMapとする
+//		Map<String, Object> newMap = new LinkedHashMap<>();
+//		stack.push(newMap);
+//
+//		// DTO配列にDTO相当の連想配列追加
+//		list.add(newMap);
+
+		
 		return this;
 	}
 	
@@ -76,9 +124,15 @@ public class JsonBuilder {
 	/**
 	 * 連想配列をクローズする
 	 */
-	public JsonBuilder appendClose(int level) {
+	public JsonBuilder appendClose() {
 		// スタックから取り除く
 		stack.pop();
+		return this;
+	}
+
+	public JsonBuilder appendCloseDtoArray() {
+		// スタックから取り除く
+		listStack.pop();
 		return this;
 	}
 
@@ -182,19 +236,21 @@ public class JsonBuilder {
 				toJsonList((List<Object>) value, json, _indent);
 				
 			} else if (value instanceof JsonAnotherSheet) {
+				json.append(kaigyo());
 				json.append(JsonAnotherSheet.class.cast(value).getJsonString());
 				
 			} else {
+				json.append(kaigyo());
 				json.append("\"").append(value).append("\"");
 			}
 			
-			json.append(",").append(kaigyo());
+			json.append(",");
 		}
 		
 		--_indent;
 
 		// 末尾のカンマと改行を削除
-		json.deleteCharAt(json.length() - 2);
+		json.deleteCharAt(json.length() - 1);
 		
 		// 改行して閉じる
 		json.append(kaigyo())

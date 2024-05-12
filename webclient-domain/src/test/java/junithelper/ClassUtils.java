@@ -72,6 +72,7 @@ public class ClassUtils {
 	    		classFiledMap = ClassUtils.loadFiledByDtoArrayField(field);
 	    		break;
 		    case LIST:
+		    case DTO_LIST:
 	    		classFiledMap = ClassUtils.loadFiledByListField(field);
 	    		break;
 	    }
