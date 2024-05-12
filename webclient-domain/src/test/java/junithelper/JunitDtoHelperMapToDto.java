@@ -23,7 +23,6 @@ public class JunitDtoHelperMapToDto {
 
 	private static String ANOTHER_SHEET_REGEX = "\\[(.*)\\]\\[(.*)\\]\\[(.*)\\]";
 	private static Pattern CELL_ANOTHER_SHEET = Pattern.compile(ANOTHER_SHEET_REGEX);
-	private static Pattern CELL_LIST_TYPE = Pattern.compile(".*<(.*)>");
 	
 	private JsonBuilder json = new JsonBuilder();
 	private JsonHolder jsonHolder = new JsonHolder();
@@ -165,7 +164,6 @@ public class JunitDtoHelperMapToDto {
 	}
 
 	/** Mapを定義したシートの値をMapに設定する **/
-	@SuppressWarnings("unchecked")
 	private void setValueMap(
 			Object dto,
 			List<List<Cell>> tubanValue,
@@ -178,7 +176,7 @@ public class JunitDtoHelperMapToDto {
 			Cell keyCell = keyCells.get(i);
 			Cell valCell = valCells.get(i);
 
-			json.appendValue(
+			json.addValue(
 					ExcelUtils.getExcelValue(keyCell),
 					valCell);
 		}
@@ -215,7 +213,7 @@ public class JunitDtoHelperMapToDto {
 		    // 階層レベルが下がった場合、スタックからDTOを一つ削除する
 		    if (preLevel > level) {
 		    	classFiledMapStack.pop();
-		    	json.appendClose();
+		    	json.closeAssociativeArray();
 		    }
 
 		    // 設定対象のField
@@ -287,7 +285,7 @@ public class JunitDtoHelperMapToDto {
 				// DTOの場合 TODO この処理に不具合がある！！！
             	
             	// 親階層のJSON編集
-		    	json.appendAssociativeArray(field, level);
+		    	json.startAssociativeArray(field, level);
             	// 子階層のJSON編集
 		        int assertLineCount = appendRenbanItems(
 		        		dtoAll, sheetMap, fieldInfo, fields, field, renbanList, itemIndex, PropertPattern.DTO);
@@ -297,7 +295,7 @@ public class JunitDtoHelperMapToDto {
     		    	
 			} else {
 				System.out.println("通常\t" + field.getName() + "\t" + field.getType());
-				json.appendValue(field, cell);
+				json.addValue(field, cell);
 			}
 			
 		    // 階層レベルを前回分として保持
@@ -349,9 +347,9 @@ public class JunitDtoHelperMapToDto {
 	    
 	    if (pattern.isArray()) {
 	    	if (pattern.isDtoArray()) {
-	    		json.appendOpenDtoArray(field);
+	    		json.startDtoArray(field);
 	    	} else {
-		    	json.appendOpenArray(field);
+		    	json.startArray(field);
 	    	}
 	    }
 	    
@@ -369,7 +367,7 @@ public class JunitDtoHelperMapToDto {
 	    	
 		    if (pattern.isDtoArray()) {
 		    	// DTO配列の場合、連想配列をリストに登録
-		    	json.appendAssociativeArrayForList(field);
+		    	json.startAssociativeArrayAddList(field);
 		    }
 	    	
 			boolean first = true;
@@ -395,16 +393,16 @@ public class JunitDtoHelperMapToDto {
 
 		    if (pattern.isDtoArray()) {
 		    	// DTO配列の場合、連想配列を除去
-		    	json.appendClose();
+		    	json.closeAssociativeArray();
 		    }
 		    
 		    wRenbanList.clear();
 	    }
 	    
     	if (pattern.isDtoArray()) {
-    		json.appendCloseDtoArray();
+    		json.closeDtoArray();
     	} else if (pattern.isDto()) {
-    		json.appendClose();
+    		json.closeAssociativeArray();
     	}
 	    return appendLineCount;
 	}

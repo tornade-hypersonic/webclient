@@ -19,41 +19,47 @@ import org.apache.poi.ss.usermodel.Cell;
 public class JsonBuilder {
 
 	private Map<String, Object> jsonMap;
-    private Deque<Map<String, Object>> stack;
+    private Deque<Map<String, Object>> mapStack;
     private Deque<List<Object>> listStack;
 	
 	public JsonBuilder() {
 		clear();
 	}
 
+	/**
+	 * 初期化
+	 */
 	public void clear() {
 		jsonMap = new LinkedHashMap<>();
-	    stack = new ArrayDeque<>();
-	    stack.push(jsonMap);
+	    mapStack = new ArrayDeque<>();
+	    mapStack.push(jsonMap);
 	    listStack = new ArrayDeque<>();
 	}
 
 	/**
-	 * 連想配列開始
+	 * 連想配列を開始
 	 */
-	public JsonBuilder appendAssociativeArray(Field field, int level) {
+	public JsonBuilder startAssociativeArray(Field field, int level) {
 		
 		Map<String, Object> newMap = new LinkedHashMap<>();
 		
-		Map<String, Object> map = stack.peek();
+		Map<String, Object> map = mapStack.peek();
 		if (map == null) {
 			System.out.println("debug appendAssociativeArray");
 		}
 		map.put(field.getName(), newMap);
-		stack.push(newMap);
+		mapStack.push(newMap);
 		return this;
 	}
 
-	public JsonBuilder appendAssociativeArrayForList(Field field) {
+	/**
+	 * 連想配列を開始し、リストに追加
+	 */
+	public JsonBuilder startAssociativeArrayAddList(Field field) {
 		
 		// 連想配列の追加
 		Map<String, Object> newMap = new LinkedHashMap<>();
-		stack.push(newMap);
+		mapStack.push(newMap);
 		
 		// リストに追加
 		List<Object> list = listStack.peek();
@@ -63,42 +69,30 @@ public class JsonBuilder {
 	}
 	
 	/**
-	 * 配列開始
+	 * 配列を開始
 	 */
-//	public JsonBuilder appendOpenArray(Field field) {
-//		Map<String, Object> map = stack.peek();
-//		map.put(field.getName(), new ArrayList<>());
-//		return this;
-//	}
-	public JsonBuilder appendOpenArray(Field field) {
-		Map<String, Object> map = stack.peek();
+	public JsonBuilder startArray(Field field) {
+		Map<String, Object> map = mapStack.peek();
 		
 	    List<Object> _currentList = new ArrayList<>();
 		map.put(field.getName(), _currentList);
-		
-//		this.currentList = _currentList;
 
 		return this;
 	}
 	
-	public JsonBuilder appendOpenDtoArray(Field field) {
+	/**
+	 * DTO配列を開始
+	 */
+	public JsonBuilder startDtoArray(Field field) {
 
 		// DTO配列格納用のリスト
 		List<Object> list = new ArrayList<>();
 
 		// DTO配列格納用リストを親のMapに登録
-		Map<String, Object> map = stack.peek();
+		Map<String, Object> map = mapStack.peek();
 		map.put(field.getName(), list);
 		
 		listStack.push(list);
-		
-//		// DTO格納用のMapを用意し、カレントMapとする
-//		Map<String, Object> newMap = new LinkedHashMap<>();
-//		stack.push(newMap);
-//
-//		// DTO配列にDTO相当の連想配列追加
-//		list.add(newMap);
-
 		
 		return this;
 	}
@@ -106,32 +100,35 @@ public class JsonBuilder {
 	/**
 	 * 値を追加する
 	 */
-	public JsonBuilder appendValue(Field field, Cell cell) {
-		return appendValue(field.getName(), cell);
+	public JsonBuilder addValue(Field field, Cell cell) {
+		return addValue(field.getName(), cell);
 	}
 	
 	/**
 	 * 値を追加する
 	 */
-	public JsonBuilder appendValue(String name, Cell cell) {
+	public JsonBuilder addValue(String name, Cell cell) {
 		
-		Map<String,Object> map = stack.peek();
+		Map<String,Object> map = mapStack.peek();
 		String value = ExcelUtils.getExcelValue(cell);
 		map.put(name, value);
 		return this;
 	}
 	
 	/**
-	 * 連想配列をクローズする
+	 * 連想配列を終了
 	 */
-	public JsonBuilder appendClose() {
-		// スタックから取り除く
-		stack.pop();
+	public JsonBuilder closeAssociativeArray() {
+		// Mapスタックから取り除く
+		mapStack.pop();
 		return this;
 	}
 
-	public JsonBuilder appendCloseDtoArray() {
-		// スタックから取り除く
+	/**
+	 * 配列を終了
+	 */
+	public JsonBuilder closeDtoArray() {
+		// Listスタックから取り除く
 		listStack.pop();
 		return this;
 	}
@@ -141,7 +138,7 @@ public class JsonBuilder {
 	 */
 	public JsonBuilder appendAnotherSheetMap(String name, String jsonString) {
 
-		Map<String,Object> map = stack.peek();
+		Map<String,Object> map = mapStack.peek();
 		map.put(name, new JsonAnotherSheet(jsonString));
 		return this;
 	}
@@ -151,7 +148,7 @@ public class JsonBuilder {
 	 */
 	public String toJson() {
 		StringBuilder json = new StringBuilder();
-		toJsonMap(this.jsonMap, json, 0);
+		appendMap(this.jsonMap, json, 0);
 		return json.toString();
 	}
 	
@@ -159,7 +156,7 @@ public class JsonBuilder {
 	 * MapをJSONへ変換
 	 */
 	@SuppressWarnings("unchecked")
-	private void toJsonMap(Map<String, Object> map, StringBuilder json, int indent) {
+	private void appendMap(Map<String, Object> map, StringBuilder json, int indent) {
 		
 		int _indent = indent;
 
@@ -185,25 +182,25 @@ public class JsonBuilder {
 			
 			// 連想配列の値を編集
 			if (value instanceof Map) {
-				toJsonMap((Map<String, Object>) value, json, _indent);
+				appendMap((Map<String, Object>) value, json, _indent);
 				
 			} else if (value instanceof List) {
-				toJsonList((List<Object>) value, json, _indent);
+				appendList((List<Object>) value, json, _indent);
 				
 			} else if (value instanceof JsonAnotherSheet) {
-				json.append(JsonAnotherSheet.class.cast(value).getJsonString());
+				appendAnotherSheet(json, value, _indent);
 				
 			} else {
-				json.append("\"").append(value).append("\"");
+				appendValue(json, value);
 				
 			}
-			json.append(", ");
+			json.append(",");
 		}		
 		
 		--_indent;
 
 		// カンマと半角空白を削除
-		json.deleteCharAt(json.length() - 2);
+		json.deleteCharAt(json.length() - 1);
 		
 		// 連想配列のクローズ
 		json.append(kaigyo())
@@ -215,7 +212,7 @@ public class JsonBuilder {
 	 * ListをJSONへ変換
 	 */
 	@SuppressWarnings("unchecked")
-	private void toJsonList(List<Object> list, StringBuilder json, int indent) {
+	private void appendList(List<Object> list, StringBuilder json, int indent) {
 		
 		int _indent = indent;
 		
@@ -230,18 +227,18 @@ public class JsonBuilder {
 		for (Object value : list) {
 			
 			if (value instanceof Map) {
-				toJsonMap((Map<String, Object>) value, json, _indent);
+				appendMap((Map<String, Object>) value, json, _indent);
 				
 			} else if (value instanceof List) {
-				toJsonList((List<Object>) value, json, _indent);
+				appendList((List<Object>) value, json, _indent);
 				
 			} else if (value instanceof JsonAnotherSheet) {
 				json.append(kaigyo());
-				json.append(JsonAnotherSheet.class.cast(value).getJsonString());
+				appendAnotherSheet(json, value, _indent);
 				
 			} else {
 				json.append(kaigyo());
-				json.append("\"").append(value).append("\"");
+				appendValue(json, value);
 			}
 			
 			json.append(",");
@@ -256,6 +253,27 @@ public class JsonBuilder {
 		json.append(kaigyo())
 			.append(headspace(_indent))
 			.append("]");
+	}
+	
+	/**
+	 * 値を追加する
+	 */
+	private void appendValue(StringBuilder json, Object value) {
+		json.append("\"").append(value).append("\"");
+	}
+	
+	/**
+	 * 別シートで作成されたJSONを追加する
+	 */
+	private void appendAnotherSheet(StringBuilder json, Object value, int indent) {
+		String jsonString = JsonAnotherSheet.class.cast(value).getJsonString();
+		String[] split = jsonString.split(kaigyo(), -1);
+		json.append(kaigyo());
+		for (String string : split) {
+			json.append(headspace(indent - 1)).append(string).append(kaigyo());
+		}
+		// 末尾の改行を削除
+		json.deleteCharAt(json.length() - 1);
 	}
 	
 	/**
