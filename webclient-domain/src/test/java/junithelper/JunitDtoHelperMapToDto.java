@@ -145,11 +145,10 @@ public class JunitDtoHelperMapToDto {
 			    	// Mapを定義したシートの場合、Map固有の設定処理を行う
 				    if (dto instanceof Map) {
 				    	setValueMap(dto, tubanEntry.getValue(), fields);
-				    	continue;
+				    } else {
+					    setValue(dtoAll, sheetMap, fields, classFiledMap, tubanEntry.getValue(), 0);
 				    }
 
-				    // Excelの値をDTOに設定する
-				    setValue(dtoAll, sheetMap, fields, classFiledMap, tubanEntry.getValue(), 0);
 			    	
 				    // JSONからDTOへ変換
 				    String jsonString = json.toJson();
@@ -175,17 +174,13 @@ public class JunitDtoHelperMapToDto {
 		List<Cell> keyCells = tubanValue.get(0);
 		List<Cell> valCells = tubanValue.get(1);
 
-		DtoFieldInfo keyField = fields.get(0);
-		DtoFieldInfo valField = fields.get(1);
-
 		for (int i = 0; i < keyCells.size(); i++) {
 			Cell keyCell = keyCells.get(i);
 			Cell valCell = valCells.get(i);
 
-		    Object key = ExcelUtils.getExcelValueForDto(keyCell, keyField.getFieldClassName());
-		    Object val = ExcelUtils.getExcelValueForDto(valCell, valField.getFieldClassName());
-
-		    Map.class.cast(dto).put(key, val);
+			json.appendValue(
+					ExcelUtils.getExcelValue(keyCell),
+					valCell);
 		}
 
 	}
@@ -232,16 +227,21 @@ public class JunitDtoHelperMapToDto {
 			}
 
 		    // TODO 後で削除する
-		    if ("serviceInfoListLevel".equals(fieldInfo.getFieldName())) {
+		    if ("testFloat".equals(fieldInfo.getFieldName())) {
 		    	System.out.println("デバッグ用");
 		    }
 
 		    if (cellValue.matches(ANOTHER_SHEET_REGEX)) {
 				// TODO 保留
 		    	
-		    	if (List.class.isAssignableFrom(field.getType())) {
+		    	if (field.getType().isArray()) {
+					// TODO 配列の場合
 		    		
-			    } else if (field.getType().isArray()) {
+			    } else if (List.class.isAssignableFrom(field.getType())) {
+					// TODO リストの場合
+			    	
+			    } else if (Map.class.isAssignableFrom(field.getType())) {
+					// TODO Mapの場合
 			    	
 		    	} else {
 		    		appendAnotherDto(dtoAll, sheetMap, cell, fieldInfo);
@@ -297,7 +297,7 @@ public class JunitDtoHelperMapToDto {
     		    	
 			} else {
 				System.out.println("通常\t" + field.getName() + "\t" + field.getType());
-				json.appendValue(field, cell, level);
+				json.appendValue(field, cell);
 			}
 			
 		    // 階層レベルを前回分として保持

@@ -58,11 +58,18 @@ public class JsonBuilder {
 	/**
 	 * 値を追加する
 	 */
-	public JsonBuilder appendValue(Field field, Cell cell, int level) {
+	public JsonBuilder appendValue(Field field, Cell cell) {
+		return appendValue(field.getName(), cell);
+	}
+	
+	/**
+	 * 値を追加する
+	 */
+	public JsonBuilder appendValue(String name, Cell cell) {
 		
 		Map<String,Object> map = stack.peek();
 		String value = ExcelUtils.getExcelValue(cell);
-		map.put(field.getName(), value);
+		map.put(name, value);
 		return this;
 	}
 	
