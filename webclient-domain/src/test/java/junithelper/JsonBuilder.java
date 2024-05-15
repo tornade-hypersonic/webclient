@@ -72,26 +72,15 @@ public class JsonBuilder {
 		return this;
 	}
 	
-	/**
-	 * 配列を開始
-	 */
-	public JsonBuilder startArray(Field field) {
-		Map<String, Object> map = mapStack.peek();
-		
-	    List<Object> _currentList = new ArrayList<>();
-		map.put(field.getName(), _currentList);
 
-		return this;
-	}
-	
 	/**
 	 * DTO配列を開始
 	 */
-	public JsonBuilder startDtoArray(Field field) {
-		return startDtoArray(field.getName());
+	public JsonBuilder startArray(Field field) {
+		return startArray(field.getName());
 	}
 	
-	public JsonBuilder startDtoArray(String name) {
+	public JsonBuilder startArray(String name) {
 
 		// DTO配列格納用のリスト
 		List<Object> list = new ArrayList<>();
@@ -123,6 +112,14 @@ public class JsonBuilder {
 		return this;
 	}
 
+	// プリミティブ型を配列に追加する
+	public JsonBuilder addArray(String value) {
+		// リストに追加
+		List<Object> list = listStack.peek();
+		list.add(value);
+		return this;
+	}
+
 	/**
 	 * 別シートで生成されたJSONを登録
 	 */
@@ -132,7 +129,10 @@ public class JsonBuilder {
 		return this;
 	}
 
-	public JsonBuilder addAnotherSheetList(String jsonString) {
+	/**
+	 * 別シートで生成されたJSONをリストに登録
+	 */
+	public JsonBuilder addAnotherSheetArray(String jsonString) {
 		// リストに追加
 		List<Object> list = listStack.peek();
 		list.add(new JsonAnotherSheet(jsonString));
@@ -152,7 +152,7 @@ public class JsonBuilder {
 	/**
 	 * 配列を終了
 	 */
-	public JsonBuilder closeDtoArray() {
+	public JsonBuilder closeArray() {
 		// Listスタックから取り除く
 		listStack.pop();
 		return this;

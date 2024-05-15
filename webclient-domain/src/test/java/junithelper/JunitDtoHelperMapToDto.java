@@ -260,6 +260,10 @@ public class JunitDtoHelperMapToDto {
 			        		dtoAll, sheetMap, fieldInfo, fields, field, renbanList, itemIndex, PropertPattern.DTO_ARRAY);
 			        // 子階層の行数をスキップ
 			    	itemIndex = itemIndex + assertLineCount;
+		    	} else {
+		    		// プリミティブ型の配列
+		    		appendPrimitiveArray(fieldInfo, renbanList, itemIndex);
+		    		
 		    	}
 		    	
 				
@@ -277,7 +281,8 @@ public class JunitDtoHelperMapToDto {
 			    	itemIndex = itemIndex + assertLineCount;
 			    	
 		    	} else {
-		    		// TODO プリミティブ型はまだ
+		    		// プリミティブ型のリスト
+		    		appendPrimitiveArray(fieldInfo, renbanList, itemIndex);
 		    		
 		    	}
 				
@@ -324,6 +329,8 @@ public class JunitDtoHelperMapToDto {
 	 *  注意）
 	 *     id,name はこのメソッドで追加したため、id,nameはスキップする必要がある
 	 *     スキップする行数を返却し、呼び出し元でスキップする
+	 *     
+	 *  TODO このメソッドは、縦に設定→横の連番の値を設定、であるため、プリミティブ型の配列は検討しない
 	 */
 	private int appendRenbanItems(
 			Map<String, Map<String, Map<String, Object>>> dtoAll,
@@ -350,9 +357,10 @@ public class JunitDtoHelperMapToDto {
 	    
 	    if (pattern.isArray()) {
 	    	if (pattern.isDtoArray()) {
-	    		json.startDtoArray(field);
+	    		json.startArray(field);
 	    	} else {
-		    	json.startArray(field);
+	    		// TODO あとで消す
+//		    	json.startArray(field);
 	    	}
 	    }
 	    
@@ -403,7 +411,7 @@ public class JunitDtoHelperMapToDto {
 	    }
 	    
     	if (pattern.isDtoArray()) {
-    		json.closeDtoArray();
+    		json.closeArray();
     	} else if (pattern.isDto()) {
     		json.closeAssociativeArray();
     	}
@@ -451,7 +459,7 @@ public class JunitDtoHelperMapToDto {
     	String jsonString = jsonHolder.get(anotherSheetName, anotherTestNo, anotherTuban);
     	
     	if (isList) {
-    		json.addAnotherSheetList(jsonString);
+    		json.addAnotherSheetArray(jsonString);
     	} else {
         	json.addAnotherSheetMap(fieldInfo.getFieldName(), jsonString);
     	}
@@ -470,7 +478,7 @@ public class JunitDtoHelperMapToDto {
 			) {
 		
 		// DTO配列スタート
-		json.startDtoArray(fieldInfo.getFieldName());
+		json.startArray(fieldInfo.getFieldName());
 		
 	    // 連番でループ
 	    for (int renbanCnt = 0; renbanCnt < renbanList.size(); renbanCnt++) {
@@ -486,7 +494,37 @@ public class JunitDtoHelperMapToDto {
 	    }
 	 		
 		// DTO配列終了
-		json.closeDtoArray();
+		json.closeArray();
+	}
+
+	/**
+	 * プリミティブ型の配列を設定する。
+	 **/
+	private void appendPrimitiveArray(
+			DtoFieldInfo fieldInfo,
+			List<List<Cell>> renbanList,
+			int itemIndex
+			) {
+		
+		// DTO配列スタート
+		json.startArray(fieldInfo.getFieldName());
+		
+	    // 連番でループ
+	    for (int renbanCnt = 0; renbanCnt < renbanList.size(); renbanCnt++) {
+	    	
+	    	List<Cell> cells = renbanList.get(renbanCnt);
+	    	
+	    	// セルの値を取得
+	    	Cell cell = cells.get(itemIndex);
+	    	String value = ExcelUtils.getExcelValue(cell);
+	    	
+		    // 値の設定処理
+			json.addArray(value);
+
+	    }
+	 		
+		// DTO配列終了
+		json.closeArray();
 	}
 
 	/**
