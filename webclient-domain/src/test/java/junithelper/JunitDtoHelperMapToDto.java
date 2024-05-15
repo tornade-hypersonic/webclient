@@ -231,35 +231,33 @@ public class JunitDtoHelperMapToDto {
 		    }
 
 		    if (cellValue.matches(ANOTHER_SHEET_REGEX)) {
-				// TODO 保留
 		    	
-		    	if (field.getType().isArray()) {
-					// TODO 配列の場合
-		    		
-			    } else if (List.class.isAssignableFrom(field.getType())) {
-					// リストの場合
+		    	if (field.getType().isArray() ||
+		    			List.class.isAssignableFrom(field.getType())) {
+					// 配列、またはリストの場合
 			    	appendAnotherDtoList(dtoAll, sheetMap, fieldInfo, renbanList, itemIndex);
-			    	
+		    		
 			    } else if (Map.class.isAssignableFrom(field.getType())) {
 					// Mapの場合
 					appendAnotherDto(dtoAll, sheetMap, cell, fieldInfo, false);
 			    	
 		    	} else {
+		    		// DTOの場合
 		    		appendAnotherDto(dtoAll, sheetMap, cell, fieldInfo, false);
 		    	}
 		    	
 		    } else if (field.getType().isArray()) {
-				// TODO 配列の場合
+				// 配列の場合
 		    	
 		    	// DTO配列の場合
 		    	if ("[new]".equals(cellValue)) {
-	            	// 親階層のJSON編集
-//			    	json.appendAssociativeArray(field, level);
-	            	// 子階層のJSON編集
+		    		
+	            	// 子階層の値を設定 連番のデータもここで設定する
 			        int assertLineCount = appendRenbanItems(
 			        		dtoAll, sheetMap, fieldInfo, fields, field, renbanList, itemIndex, PropertPattern.DTO_ARRAY);
 			        // 子階層の行数をスキップ
 			    	itemIndex = itemIndex + assertLineCount;
+			    	
 		    	} else {
 		    		// プリミティブ型の配列
 		    		appendPrimitiveArray(fieldInfo, renbanList, itemIndex);
@@ -270,11 +268,10 @@ public class JunitDtoHelperMapToDto {
             } else if (List.class.isAssignableFrom(field.getType())) {
 				// リストの場合
             	
-		    	// DTOリストの場合
 		    	if ("[new]".equals(cellValue)) {
-	            	// 親階層のJSON編集
-//			    	json.appendAssociativeArray(field, level);
-	            	// 子階層のJSON編集
+			    	// DTOリストの場合
+
+	            	// 子階層の値を設定 連番のデータもここで設定する
 			        int assertLineCount = appendRenbanItems(
 			        		dtoAll, sheetMap, fieldInfo, fields, field, renbanList, itemIndex, PropertPattern.DTO_LIST);
 			        // 子階層の行数をスキップ

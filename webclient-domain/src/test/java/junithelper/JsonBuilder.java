@@ -47,11 +47,8 @@ public class JsonBuilder {
 		Map<String, Object> newMap = new LinkedHashMap<>();
 		
 		Map<String, Object> map = mapStack.peek();
-		if (map == null) {
-			System.out.println("debug appendAssociativeArray");
-			System.out.println(this.toJson());
-		}
 		map.put(name, newMap);
+
 		mapStack.push(newMap);
 		return this;
 	}
