@@ -20,7 +20,7 @@ public class JunitAssertHelper {
 		AssertDummy dummy = new AssertDummy();
 		AddressDto addressDto = dummy.createAddressDto();
 
-		JunitAssertHelper asserter = new JunitAssertHelper("data/test/ContractDto.xlsx");
+		JunitAssertHelper asserter = new JunitAssertHelper("data/test/junithelperv2/ContractDto.xlsx");
 		asserter.assertDto(addressDto, "addressInfo", "99-1", "2");
 
 	}
