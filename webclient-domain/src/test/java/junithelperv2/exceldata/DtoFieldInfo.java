@@ -1,4 +1,4 @@
-package junithelperv2;
+package junithelperv2.exceldata;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 

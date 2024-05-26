@@ -16,13 +16,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import junithelper.CellOperationException;
 import junithelper.Enums.PropertPattern;
-import junithelperv2.excel.DtoExcelSheet;
-import junithelperv2.excel.ExcelLoader;
+import junithelperv2.excel.ExcelLoader2;
 import junithelperv2.excel.ExcelUtils;
 import junithelperv2.exceldata.DtoFieldInfo;
-import junithelperv2.exceldata.DtoInfo;
+import junithelperv2.exceldata.ExcelData;
+import junithelperv2.exceldata.SheetData;
 
-public class JunitDtoHelperMapToDto {
+public class JunitDtoHelperMapToDto2 {
 
 	private static String ANOTHER_SHEET_REGEX = "\\[(.*)\\]\\[(.*)\\]\\[(.*)\\]";
 	private static Pattern CELL_ANOTHER_SHEET = Pattern.compile(ANOTHER_SHEET_REGEX);
@@ -34,7 +34,7 @@ public class JunitDtoHelperMapToDto {
 
 	public static void main(String[] args) {
 		try {
-			new JunitDtoHelperMapToDto().createDtoFromExcel("data/test/junithelperv2/ContractDto.xlsx");
+			new JunitDtoHelperMapToDto2().createDtoFromExcel("data/test/junithelperv2/ContractDto.xlsx");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -64,10 +64,10 @@ public class JunitDtoHelperMapToDto {
 		DtoAll dtoAll;
 		try {
 			// Excelを読込み、シート毎のDTO情報をメモリに展開する
-			Map<String, DtoExcelSheet> sheetMap = ExcelLoader.loadExcelSheet(fileName);
+			ExcelData excelData = ExcelLoader2.loadExcelData(fileName);
 
 			// シート毎のDTOを生成する
-			dtoAll = createDtos(sheetMap);
+			dtoAll = createDtos(excelData);
 			System.out.println(dtoAll);
 
 		} catch (Exception e) {
@@ -80,16 +80,15 @@ public class JunitDtoHelperMapToDto {
 
 
 	/** 1Excelに定義されたDTOを作成する **/
-	private DtoAll createDtos(Map<String, DtoExcelSheet> sheetMap) {
+	private DtoAll createDtos(ExcelData excelData) {
 
 	    // 全DTO格納用
 		DtoAll dtoAll = new DtoAll();
 
 		// シート毎にDTOを作成する
-		Set<Entry<String,DtoExcelSheet>> entrySet = sheetMap.entrySet();
-		for (Entry<String, DtoExcelSheet> entry : entrySet) {
-			String sheetName = entry.getKey();
-			createDtoFromSheet(dtoAll, sheetMap, sheetName);
+		Set<String> sheetKeySet = excelData.getSheetKeySet();
+		for (String sheetName : sheetKeySet) {
+			createDtoFromSheet(dtoAll, excelData, sheetName);
 		}
 
 	    System.out.println("★★ createDtoFromSheet dtoAll=" + dtoAll);
@@ -99,8 +98,10 @@ public class JunitDtoHelperMapToDto {
 	/** 1Sheetに定義されたDTOを作成する **/
 	private void createDtoFromSheet(
 			DtoAll dtoAll,
-			Map<String, DtoExcelSheet> sheetMap,
-			String sheetName) {
+			ExcelData excelData,
+			String sheetName
+			) {
+		
 
 		if (dtoAll.containsSheet(sheetName)) {
 			System.out.println("シート名[" + sheetName + "]はすでに生成済みのため、生成しない");
@@ -109,14 +110,14 @@ public class JunitDtoHelperMapToDto {
 
 		try {
 
-			DtoExcelSheet dtoExcelSheet = sheetMap.get(sheetName);
-			DtoInfo dtoInfo = dtoExcelSheet.getDtoInfo();
+			// シートのデータを取得
+			SheetData sheetData = excelData.getSheetData(sheetName);
 
 		    // 項目物理名を取得
-		    List<DtoFieldInfo> fields = dtoInfo.getDtoFieldInfo();
+		    List<DtoFieldInfo> fields = sheetData.getDtoFieldInfo();
 
 		    // Excelから取得した情報
-		    Map<String, Map<String, List<List<Cell>>>> dtoDatas = dtoInfo.getDtoDatas();
+		    Map<String, Map<String, List<List<Cell>>>> dtoDatas = sheetData.getDtoDatas();
 
 	    	// 試験Noでループ
 		    for (Iterator<Entry<String, Map<String, List<List<Cell>>>>> testNoiterator = dtoDatas.entrySet().iterator();
@@ -133,16 +134,16 @@ public class JunitDtoHelperMapToDto {
 			    	Entry<String, List<List<Cell>>> tubanEntry = tubanIterator.next();
 
 				    // DTOを作成する
-			    	Object dto = Utils.newInstance(dtoInfo.getClassName());
+			    	Object dto = Utils.newInstance(sheetData.getClassName());
 
 				    // Field情報をロード
-				    Map<String,Field> classFiledMap = ClassUtils.loadFiled(dtoInfo.getClassName());
+				    Map<String,Field> classFiledMap = ClassUtils.loadFiled(sheetData.getClassName());
 
 			    	// Mapを定義したシートの場合、Map固有の設定処理を行う
 				    if (dto instanceof Map) {
 				    	setValueMap(dto, tubanEntry.getValue(), fields);
 				    } else {
-					    setValue(dtoAll, sheetMap, fields, classFiledMap, tubanEntry.getValue(), 0);
+					    setValue(dtoAll, excelData, fields, classFiledMap, tubanEntry.getValue(), 0);
 				    }
 
 			    	
@@ -187,7 +188,7 @@ public class JunitDtoHelperMapToDto {
 	/** Excelの1通番をDTOに設定する **/
 	private void setValue(
 			DtoAll dtoAll,
-			Map<String, DtoExcelSheet> sheetMap,
+			ExcelData excelData,
 			List<DtoFieldInfo> fields,
 			Map<String,Field> classFiledMap,
 			List<List<Cell>> renbanList,
@@ -221,15 +222,15 @@ public class JunitDtoHelperMapToDto {
 		    	if (field.getType().isArray() ||
 		    			List.class.isAssignableFrom(field.getType())) {
 					// 配列、またはリストの場合
-			    	appendAnotherDtoList(dtoAll, sheetMap, fieldInfo, renbanList, itemIndex);
+			    	appendAnotherDtoList(dtoAll, excelData, fieldInfo, renbanList, itemIndex);
 		    		
 			    } else if (Map.class.isAssignableFrom(field.getType())) {
 					// Mapの場合
-					appendAnotherDto(dtoAll, sheetMap, cell, fieldInfo, false);
+					appendAnotherDto(dtoAll, excelData, cell, fieldInfo, false);
 			    	
 		    	} else {
 		    		// DTOの場合
-		    		appendAnotherDto(dtoAll, sheetMap, cell, fieldInfo, false);
+		    		appendAnotherDto(dtoAll, excelData, cell, fieldInfo, false);
 		    	}
 		    	
 		    } else if (field.getType().isArray()) {
@@ -240,7 +241,7 @@ public class JunitDtoHelperMapToDto {
 		    		
 	            	// 子階層の値を設定 連番のデータもここで設定する
 			        int assertLineCount = appendRenbanItems(
-			        		dtoAll, sheetMap, fieldInfo, fields, field, renbanList, itemIndex, PropertPattern.DTO_ARRAY);
+			        		dtoAll, excelData, fieldInfo, fields, field, renbanList, itemIndex, PropertPattern.DTO_ARRAY);
 			        // 子階層の行数をスキップ
 			    	itemIndex = itemIndex + assertLineCount;
 			    	
@@ -259,7 +260,7 @@ public class JunitDtoHelperMapToDto {
 
 	            	// 子階層の値を設定 連番のデータもここで設定する
 			        int assertLineCount = appendRenbanItems(
-			        		dtoAll, sheetMap, fieldInfo, fields, field, renbanList, itemIndex, PropertPattern.DTO_LIST);
+			        		dtoAll, excelData, fieldInfo, fields, field, renbanList, itemIndex, PropertPattern.DTO_LIST);
 			        // 子階層の行数をスキップ
 			    	itemIndex = itemIndex + assertLineCount;
 			    	
@@ -280,7 +281,7 @@ public class JunitDtoHelperMapToDto {
 		    	json.startAssociativeArray(field);
             	// 子階層のJSON編集
 		        int assertLineCount = appendRenbanItems(
-		        		dtoAll, sheetMap, fieldInfo, fields, field, renbanList, itemIndex, PropertPattern.DTO);
+		        		dtoAll, excelData, fieldInfo, fields, field, renbanList, itemIndex, PropertPattern.DTO);
 		        // 子階層の行数をスキップ
 		    	itemIndex = itemIndex + assertLineCount;
 		        
@@ -315,7 +316,7 @@ public class JunitDtoHelperMapToDto {
 	 */
 	private int appendRenbanItems(
 			DtoAll dtoAll,
-			Map<String, DtoExcelSheet> sheetMap,
+			ExcelData excelData,
 			DtoFieldInfo fieldInfo,
 			List<DtoFieldInfo> fields,
 			Field field,
@@ -376,7 +377,7 @@ public class JunitDtoHelperMapToDto {
 		    appendLineCount = wCells.size();
 
 		    // 値の設定処理
-		    setValue(dtoAll, sheetMap, wFields, classFiledMap, wRenbanList, parentLevel);
+		    setValue(dtoAll, excelData, wFields, classFiledMap, wRenbanList, parentLevel);
 
 		    if (pattern.isDtoArray()) {
 		    	// DTO配列の場合、連想配列を除去
@@ -401,7 +402,7 @@ public class JunitDtoHelperMapToDto {
 	 **/
 	private void appendAnotherDto(
 			DtoAll dtoAll,
-			Map<String, DtoExcelSheet> sheetMap,
+			ExcelData excelData,
 			Cell cell,
 			DtoFieldInfo fieldInfo,
 			boolean isList) {
@@ -425,7 +426,7 @@ public class JunitDtoHelperMapToDto {
 	    	// 指定したシートのDTOがまだ生成されてない場合、生成する
     		backupJsonBuilder();
     		
-	    	createDtoFromSheet(dtoAll, sheetMap, anotherSheetName);
+	    	createDtoFromSheet(dtoAll, excelData, anotherSheetName);
 	    	
 	    	restoreJsonBuilder();
     	}
@@ -447,7 +448,7 @@ public class JunitDtoHelperMapToDto {
 	 **/
 	private void appendAnotherDtoList(
 			DtoAll dtoAll,
-			Map<String, DtoExcelSheet> sheetMap,
+			ExcelData excelData,
 			DtoFieldInfo fieldInfo,
 			List<List<Cell>> renbanList,
 			int itemIndex
@@ -465,7 +466,7 @@ public class JunitDtoHelperMapToDto {
 	    	Cell cell = cells.get(itemIndex);
 	    	
 		    // 値の設定処理
-			appendAnotherDto(dtoAll, sheetMap, cell, fieldInfo, true);
+			appendAnotherDto(dtoAll, excelData, cell, fieldInfo, true);
 
 	    }
 	 		

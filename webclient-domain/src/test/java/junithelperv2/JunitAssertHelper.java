@@ -20,6 +20,8 @@ import junithelperv2.excel.CellOperationException;
 import junithelperv2.excel.DtoExcelSheet;
 import junithelperv2.excel.ExcelLoader;
 import junithelperv2.excel.ExcelUtils;
+import junithelperv2.exceldata.DtoFieldInfo;
+import junithelperv2.exceldata.DtoInfo;
 import junithelperv2.target.AddressDto;
 import junithelperv2.target.AssertDummy;
 
