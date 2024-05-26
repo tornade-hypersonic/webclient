@@ -30,14 +30,6 @@ public class JunitDtoHelperMapToDtoTest {
 		ContractDto contractDto1_2_1 = ContractDto.class.cast(dtos.getDto("Sheet1", "1-2", "1"));
 		testContractDto1_2_1(contractDto1_2_1);
 
-		
-		
-//		ObjectMapper objectMapper = new ObjectMapper();
-//		JavaTimeModule jtm = new JavaTimeModule();
-//		objectMapper.registerModule(jtm);	
-//		String json1 = objectMapper.writeValueAsString(contractDto1);
-//		System.out.println("■" + json1);
-		
 	}
 
 

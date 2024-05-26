@@ -17,11 +17,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 
 import junithelperv2.excel.CellOperationException;
-import junithelperv2.excel.DtoExcelSheet;
-import junithelperv2.excel.ExcelLoader;
+import junithelperv2.excel.ExcelLoader2;
 import junithelperv2.excel.ExcelUtils;
 import junithelperv2.exceldata.DtoFieldInfo;
-import junithelperv2.exceldata.DtoInfo;
+import junithelperv2.exceldata.ExcelData;
+import junithelperv2.exceldata.SheetData;
 import junithelperv2.target.AddressDto;
 import junithelperv2.target.AssertDummy;
 
@@ -40,20 +40,19 @@ public class JunitAssertHelper {
 	private static Pattern CELL_ANOTHER_SHEET = Pattern.compile(ANOTHER_SHEET_REGEX);
 
 	/** 1Excelのシート **/
-	Map<String, DtoExcelSheet> sheetMap;
+	ExcelData excelData;
 
 	public JunitAssertHelper(String excelFileName) {
-		sheetMap = ExcelLoader.loadExcelSheet(excelFileName);
+		excelData = ExcelLoader2.loadExcelData(excelFileName);
 	}
 
 	public void assertDto(Object targetDto, String sheetName, String testNo, String tuban) {
 
 		// エクセルシート生成
-		DtoExcelSheet sheet = sheetMap.get(sheetName);
+		SheetData sheetData = excelData.getSheetData(sheetName);
 
-		DtoInfo dtoInfo = sheet.getDtoInfo();
-		List<DtoFieldInfo> dtoFieldInfos = dtoInfo.getDtoFieldInfo();
-		Map<String, Map<String, List<List<Cell>>>> datas = dtoInfo.getDtoDatas();
+		List<DtoFieldInfo> dtoFieldInfos = sheetData.getDtoFieldInfo();
+		Map<String, Map<String, List<List<Cell>>>> datas = sheetData.getDtoDatas();
 		List<List<Cell>> renbanList = datas.get(testNo).get(tuban);
 
 		assertValue(targetDto, dtoFieldInfos, renbanList);
@@ -265,10 +264,9 @@ public class JunitAssertHelper {
     	String anotherTuban = matcher.group(3);
 
 		// Mapのシートを取得
-		DtoExcelSheet sheet = sheetMap.get(anotherSheetName);
+    	SheetData sheetData = excelData.getSheetData(anotherSheetName);
 
-		DtoInfo dtoInfo = sheet.getDtoInfo();
-		Map<String, Map<String, List<List<Cell>>>> datas = dtoInfo.getDtoDatas();
+		Map<String, Map<String, List<List<Cell>>>> datas = sheetData.getDtoDatas();
 		List<List<Cell>> renbanList = datas.get(anotherTestNo).get(anotherTuban);
 
 		// Mapシートは連番リストは2つのみ
