@@ -17,7 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 
 import junithelperv2.excel.CellOperationException;
-import junithelperv2.excel.ExcelLoader2;
+import junithelperv2.excel.ExcelLoader;
 import junithelperv2.excel.ExcelUtils;
 import junithelperv2.exceldata.DtoFieldInfo;
 import junithelperv2.exceldata.ExcelData;
@@ -43,7 +43,7 @@ public class JunitAssertHelper {
 	ExcelData excelData;
 
 	public JunitAssertHelper(String excelFileName) {
-		excelData = ExcelLoader2.loadExcelData(excelFileName);
+		excelData = ExcelLoader.loadExcelData(excelFileName);
 	}
 
 	public void assertDto(Object targetDto, String sheetName, String testNo, String tuban) {

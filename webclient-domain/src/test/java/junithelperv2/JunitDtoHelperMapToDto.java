@@ -16,7 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import junithelper.CellOperationException;
 import junithelper.Enums.PropertPattern;
-import junithelperv2.excel.ExcelLoader2;
+import junithelperv2.excel.ExcelLoader;
 import junithelperv2.excel.ExcelUtils;
 import junithelperv2.exceldata.DtoFieldInfo;
 import junithelperv2.exceldata.ExcelData;
@@ -64,7 +64,7 @@ public class JunitDtoHelperMapToDto {
 		DtoAll dtoAll;
 		try {
 			// Excelを読込み、シート毎のDTO情報をメモリに展開する
-			ExcelData excelData = ExcelLoader2.loadExcelData(fileName);
+			ExcelData excelData = ExcelLoader.loadExcelData(fileName);
 
 			// シート毎のDTOを生成する
 			dtoAll = createDtos(excelData);

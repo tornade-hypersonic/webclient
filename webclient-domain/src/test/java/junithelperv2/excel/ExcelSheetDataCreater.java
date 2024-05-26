@@ -15,7 +15,6 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import junithelperv2.Utils;
 import junithelperv2.exceldata.DtoFieldInfo;
-import junithelperv2.exceldata.DtoInfo;
 import junithelperv2.exceldata.SheetData;
 
 public class ExcelSheetDataCreater {
@@ -37,17 +36,13 @@ public class ExcelSheetDataCreater {
 	}
 
 	private ExcelSheetWrapper sheet;
-	private DtoInfo dtoInfo;
 
 	/** コンストラクタ **/
-//	public ExcelSheetDataCreater(Sheet sheet) {
-//		this.sheet = sheet;
-//		this.dtoInfo = create();
-//	}
 	public ExcelSheetDataCreater(Sheet _sheet) {
 		this.sheet = new ExcelSheetWrapper(_sheet);
 	}
 
+	/** メイン処理 **/
 	SheetData createSheetData() {
 
 		SheetData sheetData = new SheetData();
@@ -205,17 +200,6 @@ public class ExcelSheetDataCreater {
 	    dtoInfo.setDtoDatas(dtoDatas);
 	    System.out.println("★ Map dtoDatas=" + dtoDatas);
 
-	}
-
-
-	/** Dtoシートが無効か？ Dtoが作成できなかったら無効 **/
-	public boolean isDtoSheet() {
-		return dtoInfo != null;
-	}
-
-	/** Dto情報取得 **/
-	public DtoInfo getDtoInfo() {
-		return dtoInfo;
 	}
 
 	/** カラム情報取得 **/
