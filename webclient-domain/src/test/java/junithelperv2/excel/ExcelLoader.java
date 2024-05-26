@@ -14,6 +14,7 @@ public class ExcelLoader {
 	/** Excel情報読込み **/
 	public static ExcelData loadExcelData(String path) {
 
+		// Excel読込み
 		Workbook excel;
 		try {
 			excel = WorkbookFactory.create(new File(path));
@@ -24,20 +25,16 @@ public class ExcelLoader {
 
 		int numberOfSheets = excel.getNumberOfSheets();
 		System.out.println(numberOfSheets);
-		
 
-//		Map<String, DtoExcelSheet> sheetMap = new HashMap<>();
+		// シート毎にデータを作成し、ExcelDataに登録
 		ExcelData excelData = new ExcelData();
 		for (int i = 0; i < numberOfSheets; i++) {
 			Sheet sheet = excel.getSheetAt(i);
 			String sheetName = sheet.getSheetName();
-//			DtoExcelSheet dtoExcelSheet = new DtoExcelSheet(sheet);
 			ExcelSheetDataCreater excelSheetDataCreater = new ExcelSheetDataCreater(sheet);
 			SheetData sheetData = excelSheetDataCreater.createSheetData();
 			
-//			if (sheetData.isDtoSheet()) {
-//				sheetMap.put(sheetName, dtoExcelSheet);
-//			}
+			// シートが有効なもののみ登録する
 			if (sheetData != null) {
 				excelData.put(sheetName, sheetData);
 			}

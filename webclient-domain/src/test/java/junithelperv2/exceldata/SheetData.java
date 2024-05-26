@@ -1,10 +1,8 @@
 package junithelperv2.exceldata;
 
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.poi.ss.usermodel.Cell;
 
 public class SheetData {
 
@@ -24,7 +22,8 @@ public class SheetData {
 	 *   }
 	 * }
 	 */
-	private Map<String, Map<String, List<List<Cell>>>> dtoDatas;
+//	private Map<String, Map<String, List<List<Cell>>>> dtoDatas;
+	private DtoDataTestNo dataTestNo;
 
 	/** クラス名 **/
 	private String className;
@@ -39,11 +38,18 @@ public class SheetData {
 	public void setDtoFieldInfo(List<DtoFieldInfo> dtoFieldInfo) {
 		this.dtoFieldInfo = dtoFieldInfo;
 	}
-	public Map<String, Map<String, List<List<Cell>>>> getDtoDatas() {
-		return dtoDatas;
+	//
+//	public Map<String, Map<String, List<List<Cell>>>> getDtoDatas() {
+//		return dtoDatas;
+//	}
+//	public void setDtoDatas(Map<String, Map<String, List<List<Cell>>>> dtoDatas) {
+//		this.dtoDatas = dtoDatas;
+//	}
+	public DtoDataTestNo getDtoDatas() {
+		return dataTestNo;
 	}
-	public void setDtoDatas(Map<String, Map<String, List<List<Cell>>>> dtoDatas) {
-		this.dtoDatas = dtoDatas;
+	public void setDtoDatas(DtoDataTestNo dataTestNo) {
+		this.dataTestNo = dataTestNo;
 	}
 	public String getClassName() {
 		return className;

@@ -4,6 +4,10 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class DtoFieldInfo {
 
+	private String fieldName;
+	private String fieldClassName;
+	private int level;
+
 	public String getFieldName() {
 		return fieldName;
 	}
@@ -24,10 +28,6 @@ public class DtoFieldInfo {
 	public void setLevel(int level) {
 		this.level = level;
 	}
-
-	private String fieldName;
-	private String fieldClassName;
-	private int level;
 
 	@Override
 	public String toString() {

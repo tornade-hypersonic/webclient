@@ -2,10 +2,7 @@ package junithelperv2.excel;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -14,6 +11,8 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import junithelperv2.Utils;
+import junithelperv2.exceldata.DtoDataTestNo;
+import junithelperv2.exceldata.DtoDataTuban;
 import junithelperv2.exceldata.DtoFieldInfo;
 import junithelperv2.exceldata.SheetData;
 
@@ -73,8 +72,11 @@ public class ExcelSheetDataCreater {
 		}
 
 	    // 全データ格納用マップ
-	    Map<String, Map<String, List<List<Cell>>>> dtoDatas = new LinkedHashMap<>();
-	    Map<String, List<List<Cell>>> dtoData = new LinkedHashMap<>();
+//	    Map<String, Map<String, List<List<Cell>>>> dtoDatas = new LinkedHashMap<>();
+//	    Map<String, List<List<Cell>>> dtoData = new LinkedHashMap<>();
+	    
+	    DtoDataTestNo dtoDataTestNo = new DtoDataTestNo();
+	    DtoDataTuban dtoDataTuban = new DtoDataTuban();
 
 	    int colCnt = ExcelConst.POS_DATA_START_COL_JAVA;
 	    int startRow = ExcelConst.POS_DATA_START_ROW_JAVA;
@@ -95,8 +97,10 @@ public class ExcelSheetDataCreater {
 		    // 試験Noが異なる場合、通番Mapを初期化
 		    if (!testNo.equals(preTestNo)) {
 		    	preTestNo = testNo;
-		    	dtoData = new HashMap<>();
-		    	dtoDatas.put(testNo, dtoData);
+//		    	dtoData = new HashMap<>();
+//		    	dtoDatas.put(testNo, dtoData);
+		    	dtoDataTuban = new DtoDataTuban();
+		    	dtoDataTestNo.put(testNo, dtoDataTuban);
 		    	preTuban = "";
 		    }
 		    // 通番が異なる場合、連番リストを初期化
@@ -105,7 +109,8 @@ public class ExcelSheetDataCreater {
 		    	tubanList = new ArrayList<List<Cell>>();
 		    }
 		    tubanList.add(cells);
-		    dtoData.put(tuban, tubanList);
+//		    dtoData.put(tuban, tubanList);
+		    dtoDataTuban.put(tuban, tubanList);
 
 		    // 行でループする
 		    int rowCnt = startRow;
@@ -128,18 +133,20 @@ public class ExcelSheetDataCreater {
 
 	    	colCnt++;
 	    }
-	    sheetData.setDtoDatas(dtoDatas);
-	    System.out.println("★ dtoDatas=" + dtoDatas);
+	    sheetData.setDtoDatas(dtoDataTestNo);
+	    System.out.println("★ dtoDatas=" + dtoDataTestNo);
 
 	    return sheetData;
 
 	}
 
-	private void loadMapData(SheetData dtoInfo) {
+	private void loadMapData(SheetData sheetData) {
 
 	    // 全データ格納用マップ
-	    Map<String, Map<String, List<List<Cell>>>> dtoDatas = new LinkedHashMap<>();
-	    Map<String, List<List<Cell>>> dtoData = new LinkedHashMap<>();
+//	    Map<String, Map<String, List<List<Cell>>>> dtoDatas = new LinkedHashMap<>();
+//	    Map<String, List<List<Cell>>> dtoData = new LinkedHashMap<>();
+	    DtoDataTestNo dtoDataTestNo = new DtoDataTestNo();
+	    DtoDataTuban dtoDataTuban = new DtoDataTuban();
 
 	    int colCnt = ExcelConst.POS_DATA_START_COL_JAVA;
 	    int startRow = ExcelConst.POS_DATA_START_ROW_JAVA;
@@ -161,8 +168,10 @@ public class ExcelSheetDataCreater {
 		    // 試験Noが異なる場合、通番Mapを初期化
 		    if (!testNo.equals(preTestNo)) {
 		    	preTestNo = testNo;
-		    	dtoData = new HashMap<>();
-		    	dtoDatas.put(testNo, dtoData);
+//		    	dtoData = new HashMap<>();
+//		    	dtoDatas.put(testNo, dtoData);
+		    	dtoDataTuban = new DtoDataTuban();
+		    	dtoDataTestNo.put(testNo, dtoDataTuban);
 		    	preTuban = "";
 		    }
 		    // 通番が異なる場合、連番リストを初期化
@@ -172,7 +181,7 @@ public class ExcelSheetDataCreater {
 		    }
 		    tubanList.add(keyCells);
 		    tubanList.add(valCells);
-		    dtoData.put(tuban, tubanList);
+		    dtoDataTuban.put(tuban, tubanList);
 
 		    // 行でループする
 		    int rowCnt = startRow;
@@ -197,8 +206,8 @@ public class ExcelSheetDataCreater {
 
 	    	colCnt = colCnt + 2;
 	    }
-	    dtoInfo.setDtoDatas(dtoDatas);
-	    System.out.println("★ Map dtoDatas=" + dtoDatas);
+	    sheetData.setDtoDatas(dtoDataTestNo);
+	    System.out.println("★ Map dtoDatas=" + dtoDataTestNo);
 
 	}
 

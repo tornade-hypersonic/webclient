@@ -18,6 +18,8 @@ import junithelper.CellOperationException;
 import junithelper.Enums.PropertPattern;
 import junithelperv2.excel.ExcelLoader;
 import junithelperv2.excel.ExcelUtils;
+import junithelperv2.exceldata.DtoDataTestNo;
+import junithelperv2.exceldata.DtoDataTuban;
 import junithelperv2.exceldata.DtoFieldInfo;
 import junithelperv2.exceldata.ExcelData;
 import junithelperv2.exceldata.SheetData;
@@ -117,18 +119,18 @@ public class JunitDtoHelperMapToDto {
 		    List<DtoFieldInfo> fields = sheetData.getDtoFieldInfo();
 
 		    // Excelから取得した情報
-		    Map<String, Map<String, List<List<Cell>>>> dtoDatas = sheetData.getDtoDatas();
+		    DtoDataTestNo dtoDataTestNo = sheetData.getDtoDatas();
 
 	    	// 試験Noでループ
-		    for (Iterator<Entry<String, Map<String, List<List<Cell>>>>> testNoiterator = dtoDatas.entrySet().iterator();
+		    for (Iterator<Entry<String, DtoDataTuban>> testNoiterator = dtoDataTestNo.entrySet().iterator();
 		    		testNoiterator.hasNext();) {
 
-		    	Entry<String, Map<String, List<List<Cell>>>> testNoEntry = testNoiterator.next();
+		    	Entry<String, DtoDataTuban> testNoEntry = testNoiterator.next();
 
-			    Map<String, List<List<Cell>>> tubanMap = testNoEntry.getValue();
+			    DtoDataTuban dtoDataTuban = testNoEntry.getValue();
 
 		    	// 通番でループ
-			    for (Iterator<Entry<String, List<List<Cell>>>> tubanIterator = tubanMap.entrySet().iterator();
+			    for (Iterator<Entry<String, List<List<Cell>>>> tubanIterator = dtoDataTuban.entrySet().iterator();
 			    		tubanIterator.hasNext();) {
 			    	
 			    	Entry<String, List<List<Cell>>> tubanEntry = tubanIterator.next();

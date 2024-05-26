@@ -52,8 +52,7 @@ public class JunitAssertHelper {
 		SheetData sheetData = excelData.getSheetData(sheetName);
 
 		List<DtoFieldInfo> dtoFieldInfos = sheetData.getDtoFieldInfo();
-		Map<String, Map<String, List<List<Cell>>>> datas = sheetData.getDtoDatas();
-		List<List<Cell>> renbanList = datas.get(testNo).get(tuban);
+		List<List<Cell>> renbanList = sheetData.getDtoDatas().get(testNo).get(tuban);
 
 		assertValue(targetDto, dtoFieldInfos, renbanList);
 
@@ -172,18 +171,6 @@ public class JunitAssertHelper {
 
 			        dtoStack.push(instance);
 
-			    } else if (targetDto.getClass().isArray()) {
-			    	// DTOが配列の場合
-			    	int assertLineCount = assertArrayDto(targetDto, cell, fieldInfo, fields, renbanList, itemIndex);
-			    	// アサート対象数をスキップする for分で+1となるので-1する
-			    	itemIndex = itemIndex + (assertLineCount - 1);
-
-			    } else if (targetDto instanceof List) {
-			    	// DTOがリストの場合
-			    	int assertLineCount = assertListDto(targetDto, cell, fieldInfo, fields, renbanList, itemIndex);
-			    	// アサート対象数をスキップする for分で+1となるので-1する
-			    	itemIndex = itemIndex + (assertLineCount - 1);
-
 			    } else {
 			    	// プリミティブ相当の値を設定する場合
 			    	assertFieldPrimitive(targetDto, cell, fieldInfo, field);
@@ -266,8 +253,9 @@ public class JunitAssertHelper {
 		// Mapのシートを取得
     	SheetData sheetData = excelData.getSheetData(anotherSheetName);
 
-		Map<String, Map<String, List<List<Cell>>>> datas = sheetData.getDtoDatas();
-		List<List<Cell>> renbanList = datas.get(anotherTestNo).get(anotherTuban);
+//		Map<String, Map<String, List<List<Cell>>>> datas = sheetData.getDtoDatas();
+//		List<List<Cell>> renbanList = datas.get(anotherTestNo).get(anotherTuban);
+		List<List<Cell>> renbanList = sheetData.getDtoDatas().get(anotherTestNo).get(anotherTuban);
 
 		// Mapシートは連番リストは2つのみ
 		List<Cell> keyCells = renbanList.get(0);
@@ -355,106 +343,6 @@ public class JunitAssertHelper {
 			System.out.println(String.format("【アサート】期待値=[%s], 実際値=[%s]", expected, actual));
 			assertEquals(expected, actual);
     	}
-	}
-
-	/** DTO配列の要素を検証する **/
-	private int assertArrayDto(
-			Object targetDtoArray,
-			Cell cell,
-			DtoFieldInfo fieldInfo,
-			List<DtoFieldInfo> fields,
-			List<List<Cell>> renbanList,
-			int itemIndex) {
-
-		// アサートの対象数
-		int assertLineCount = 0;
-
-	    // 親の階層レベルを取得
-	    // ここに到達するのは、配列で階層レベルが変わった最初の項目
-	    int parentLevel = fieldInfo.getLevel() - 1;
-
-	    List<DtoFieldInfo> wFields = new ArrayList<>();
-	    List<List<Cell>> wRenbanList = new ArrayList<>();
-
-	    // targetDtoArrayのfieldsと、renbanListを抜き出す
-	    // 階層が変わった部分のみwRenbanListに設定する
-	    // ここで先に進めた分を戻り値で返却し、二重アサートを防ぐ
-	    for (int renbanCnt = 0; renbanCnt < renbanList.size(); renbanCnt++) {
-	    	List<Cell> cells = renbanList.get(renbanCnt);
-			boolean first = true;
-		    List<Cell> wCells = new ArrayList<>();
-		    for (int i = itemIndex; i < fields.size(); i++) {
-		    	DtoFieldInfo dtoFieldInfo = fields.get(i);
-		    	if (parentLevel == dtoFieldInfo.getLevel()) {
-		    		break;
-		    	}
-		    	if (first) {
-			    	wFields.add(fields.get(i));
-		    	}
-		    	wCells.add(cells.get(i));
-	    	}
-		    first = false;
-		    wRenbanList.add(wCells);
-		    assertLineCount = wCells.size();
-
-		    // アサート（再帰処理）
-    	    Object actual = Array.get(targetDtoArray, renbanCnt);
-    	    assertValue(actual, wFields, wRenbanList);
-
-		    wRenbanList.remove(0);
-		}
-	    return assertLineCount;
-	}
-
-	/** DTOを要素とするListを検証する **/
-	private int assertListDto(
-			Object targetDtoList,
-			Cell cell,
-			DtoFieldInfo fieldInfo,
-			List<DtoFieldInfo> fields,
-			List<List<Cell>> renbanList,
-			int itemIndex) {
-
-		// アサートの対象数
-		int assertLineCount = 0;
-
-		List<?> target = (List<?>) targetDtoList;
-
-	    // 親の階層レベルを取得
-	    // ここに到達するのは、配列で階層レベルが変わった最初の項目
-	    int parentLevel = fieldInfo.getLevel() - 1;
-
-	    List<DtoFieldInfo> wFields = new ArrayList<>();
-	    List<List<Cell>> wRenbanList = new ArrayList<>();
-
-	    // targetDtoArrayのfieldsと、renbanListを抜き出す
-	    // 階層が変わった部分のみwRenbanListに設定する
-	    // ここで先に進めた分を戻り値で返却し、二重アサートを防ぐ
-	    for (int renbanCnt = 0; renbanCnt < renbanList.size(); renbanCnt++) {
-	    	List<Cell> cells = renbanList.get(renbanCnt);
-			boolean first = true;
-		    List<Cell> wCells = new ArrayList<>();
-		    for (int i = itemIndex; i < fields.size(); i++) {
-		    	DtoFieldInfo dtoFieldInfo = fields.get(i);
-		    	if (parentLevel == dtoFieldInfo.getLevel()) {
-		    		break;
-		    	}
-		    	if (first) {
-			    	wFields.add(fields.get(i));
-		    	}
-		    	wCells.add(cells.get(i));
-	    	}
-		    first = false;
-		    wRenbanList.add(wCells);
-		    assertLineCount = wCells.size();
-
-		    // アサート（再帰処理）
-    	    Object actual = target.get(renbanCnt);
-    	    assertValue(actual, wFields, wRenbanList);
-
-		    wRenbanList.remove(0);
-		}
-		return assertLineCount;
 	}
 
 	/** 別シートで定義された内容でDTOを検証する **/
