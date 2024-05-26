@@ -6,16 +6,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import junithelper.CellOperationException;
-import junithelper.Enums.PropertPattern;
+import junithelperv2.Enums.PropertPattern;
+import junithelperv2.excel.CellOperationException;
 import junithelperv2.excel.ExcelLoader;
 import junithelperv2.excel.ExcelUtils;
 import junithelperv2.exceldata.DtoDataTestNo;
@@ -23,9 +26,15 @@ import junithelperv2.exceldata.DtoDataTuban;
 import junithelperv2.exceldata.DtoFieldInfo;
 import junithelperv2.exceldata.ExcelData;
 import junithelperv2.exceldata.SheetData;
+import junithelperv2.json.JsonBuilder;
+import junithelperv2.json.JsonBuilderHolder;
+import junithelperv2.json.JsonHolder;
+import junithelperv2.json.ObjectMapperFactory;
 
 public class JunitDtoHelperMapToDto {
 
+	private static final Logger logger = LoggerFactory.getLogger(JunitDtoHelperMapToDto.class);
+	
 	private static String ANOTHER_SHEET_REGEX = "\\[(.*)\\]\\[(.*)\\]\\[(.*)\\]";
 	private static Pattern CELL_ANOTHER_SHEET = Pattern.compile(ANOTHER_SHEET_REGEX);
 	
@@ -70,7 +79,7 @@ public class JunitDtoHelperMapToDto {
 
 			// シート毎のDTOを生成する
 			dtoAll = createDtos(excelData);
-			System.out.println(dtoAll);
+			logger.debug(Objects.toString(dtoAll));
 
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -93,7 +102,6 @@ public class JunitDtoHelperMapToDto {
 			createDtoFromSheet(dtoAll, excelData, sheetName);
 		}
 
-	    System.out.println("★★ createDtoFromSheet dtoAll=" + dtoAll);
 	    return dtoAll;
 	}
 
@@ -106,7 +114,7 @@ public class JunitDtoHelperMapToDto {
 		
 
 		if (dtoAll.containsSheet(sheetName)) {
-			System.out.println("シート名[" + sheetName + "]はすでに生成済みのため、生成しない");
+			logger.warn("シート名[" + sheetName + "]はすでに生成済みのため、生成しない");
 			return;
 		}
 
@@ -148,17 +156,17 @@ public class JunitDtoHelperMapToDto {
 					    setValue(dtoAll, excelData, fields, classFiledMap, tubanEntry.getValue(), 0);
 				    }
 
-			    	
 				    // JSONからDTOへ変換
 				    String jsonString = json.toJson();
-			    	System.out.println("★JSON★" + jsonString);
 					Object dtoResult = objectMapper.readValue(jsonString, dto.getClass());
 					
 					// DTOを登録
 				    dtoAll.putDto(sheetName, testNoEntry.getKey(), tubanEntry.getKey(), dtoResult);
 				    
-				    // 後処理
+				    // DTO生成したJSONは別シート参照時に再利用するため、保持する
 				    jsonHolder.put(sheetName, testNoEntry.getKey(), tubanEntry.getKey(), jsonString);
+				    
+				    // 後処理
 			    	json.clear();
 			    }
 		    }
@@ -210,13 +218,13 @@ public class JunitDtoHelperMapToDto {
 		    // 設定対象のField
 			Field field = classFiledMap.get(fieldInfo.getFieldName());
 			if (field == null) {
-				System.out.println(json.toJson());
+				logger.debug(json.toJson());
 				throw new RuntimeException(String.format("field==null, i=%s, name=%s", itemIndex, fieldInfo.getFieldName()));
 			}
 
 		    // TODO 後で削除する
 		    if ("serviceInfoArrayLevel".equals(fieldInfo.getFieldName())) {
-		    	System.out.println("debug");
+		    	logger.debug("debug");
 		    }
 
 		    if (cellValue.matches(ANOTHER_SHEET_REGEX)) {
@@ -289,7 +297,7 @@ public class JunitDtoHelperMapToDto {
 		        
     		    	
 			} else {
-				System.out.println("通常\t" + field.getName() + "\t" + field.getType());
+				logger.debug("通常\t" + field.getName() + "\t" + field.getType());
 				json.addValue(field, cell);
 			}
 			

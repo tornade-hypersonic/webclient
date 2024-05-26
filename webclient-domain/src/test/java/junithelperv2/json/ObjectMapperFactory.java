@@ -1,4 +1,4 @@
-package junithelperv2;
+package junithelperv2.json;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;

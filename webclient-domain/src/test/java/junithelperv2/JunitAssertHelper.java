@@ -15,6 +15,8 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import junithelperv2.excel.CellOperationException;
 import junithelperv2.excel.ExcelLoader;
@@ -26,6 +28,8 @@ import junithelperv2.target.AddressDto;
 import junithelperv2.target.AssertDummy;
 
 public class JunitAssertHelper {
+
+	private static final Logger logger = LoggerFactory.getLogger(JunitAssertHelper.class);
 
 	public static void main(String[] args) {
 		AssertDummy dummy = new AssertDummy();
@@ -84,7 +88,7 @@ public class JunitAssertHelper {
 
 			    // TODO 後で削除する
 			    if ("serviceInfoListLevel".equals(fieldName)) {
-			    	System.out.println("デバッグ用");
+			    	logger.debug("デバッグ用");
 			    }
 
 			    // セルに値がない場合
@@ -265,7 +269,7 @@ public class JunitAssertHelper {
 			String key = ExcelUtils.getExcelValue(keyCells.get(i));
 			String expected = ExcelUtils.getExcelValue(valCells.get(i));
 			String actual = (String) actualMap.get(key);
-			System.out.println(String.format("【アサート】期待値=[%s], 実際値=[%s]", expected, actual));
+			logger.info(String.format("【アサート】期待値=[%s], 実際値=[%s]", expected, actual));
 			assertEquals(expected, actual);
 		}
 
@@ -308,7 +312,7 @@ public class JunitAssertHelper {
 			Object expected = ExcelUtils.getExcelValueForDto(expectedCell, listElementType);
 
 		    // アサート
-			System.out.println(String.format("【アサート】期待値=[%s], 実際値=[%s]", expected, actual));
+			logger.info(String.format("【アサート】期待値=[%s], 実際値=[%s]", expected, actual));
 			assertEquals(expected, actual);
 		}
 	}
@@ -340,7 +344,7 @@ public class JunitAssertHelper {
 			Object expected = ExcelUtils.getExcelValueForDto(expectedCell, arrayElementType);
 
 		    // アサート
-			System.out.println(String.format("【アサート】期待値=[%s], 実際値=[%s]", expected, actual));
+			logger.info(String.format("【アサート】期待値=[%s], 実際値=[%s]", expected, actual));
 			assertEquals(expected, actual);
     	}
 	}
@@ -377,7 +381,7 @@ public class JunitAssertHelper {
 
 	    // セルの値からDTOに設定するオブジェクトを取得する
 	    Object expected = ExcelUtils.getExcelValueForDto(cell, fieldClassName);
-	    System.out.println(expected + "\t" + fieldName + "\t" + fieldClassName);
+	    logger.debug(expected + "\t" + fieldName + "\t" + fieldClassName);
 
 	    // アサート
 	    Utils.assertField(dto, fieldName, expected);

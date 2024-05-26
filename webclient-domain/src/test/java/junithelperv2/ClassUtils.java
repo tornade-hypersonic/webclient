@@ -6,7 +6,7 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
-import junithelper.Enums.PropertPattern;
+import junithelperv2.Enums.PropertPattern;
 
 public class ClassUtils {
 

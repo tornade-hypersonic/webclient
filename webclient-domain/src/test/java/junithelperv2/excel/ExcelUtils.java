@@ -15,32 +15,36 @@ import org.apache.poi.ss.usermodel.DateUtil;
 //import org.joda.time.DateTime;
 //import org.joda.time.format.DateTimeFormat;
 //import org.joda.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ExcelUtils {
 
+	private static final Logger logger = LoggerFactory.getLogger(ExcelUtils.class);
+	
 	public static void main(String[] args) {
 //		DateTimeFormatter DEF_FMT = DateTimeFormat.forPattern("G yyyy-MM-dd(E) aHH:mm:ss.SSS ZZ.");
 //		DateTime pd3 = DateTime.parse("2006/01/02 15:04:05.789", DateTimeFormat.forPattern("yyyy/MM/dd HH:mm:ss.SSS"));
-//		System.out.println(DEF_FMT.print(pd3));
+//		logger.debug(DEF_FMT.print(pd3));
 
 		// 文字列 → LocalDate
 		DateTimeFormatter formatter1 = DateTimeFormatter.ofPattern("uuuu/MM/dd")
                 .withLocale(Locale.JAPANESE)
                 .withResolverStyle(ResolverStyle.STRICT);
 		LocalDate localDate = LocalDate.parse("2015/12/25", formatter1);
-		System.out.println(localDate.toString());
+		logger.debug(localDate.toString());
 
 		// 文字列 → LocalDateTime
 		formatter1 = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss.SSS")
                 .withLocale(Locale.JAPANESE)
                 .withResolverStyle(ResolverStyle.STRICT);
 		LocalDateTime localDateTime = LocalDateTime.parse("2006-01-02 15:04:05.789", formatter1);
-		System.out.println(localDateTime.toString());
+		logger.debug(localDateTime.toString());
 		
 		// java.util.Date → LocalDateTime → 文字列
 		Date date = new Date();
 	    localDateTime = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
-		System.out.println(formatter1.format(localDateTime));
+	    logger.debug(formatter1.format(localDateTime));
 	}
 
 	/**
@@ -148,7 +152,7 @@ public class ExcelUtils {
 		                .withLocale(Locale.JAPANESE)
 		                .withResolverStyle(ResolverStyle.STRICT);
 			    LocalDateTime localDateTime = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
-				System.out.println(formatter1.format(localDateTime));
+				logger.debug(formatter1.format(localDateTime));
 			     
 			}
 			return String.valueOf(cell.getNumericCellValue());

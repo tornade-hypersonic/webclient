@@ -13,12 +13,16 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.ReflectionUtils;
 
 import junithelperv2.excel.FieldType;
 
 public class Utils {
 
+	private static final Logger logger = LoggerFactory.getLogger(Utils.class);
+	
 	/** 配列を生成する **/
 	public static Object newArrayInstance(String fieldClassName) {
 
@@ -169,14 +173,14 @@ public class Utils {
 	public static void assertField(Object dto, String fieldName, Object expected) {
 
 		Object actual = Utils.getFieldObject(dto, fieldName);
-		System.out.println(String.format("【アサート】期待値=[%s], 実際値=[%s]", expected, actual));
+		logger.debug(String.format("【アサート】期待値=[%s], 実際値=[%s]", expected, actual));
 		assertEquals(expected, actual);
 	}
 	
 	public static void assertFieldFromDto(Object dto, String fieldName, Object expected) {
 
 		Object actual = Utils.getFieldObject(dto, fieldName);
-		System.out.println(String.format("【アサート】期待値=[%s], 実際値=[%s]", expected, actual));
+		logger.debug(String.format("【アサート】期待値=[%s], 実際値=[%s]", expected, actual));
 		assertEquals(expected, actual);
 	}
 	

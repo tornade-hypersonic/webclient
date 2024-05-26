@@ -74,31 +74,4 @@ public class ExcelSheetWrapper {
 		return sheet.getRow(i);
 	}
 
-//	/** カラム情報取得 **/
-//	public List<DtoFieldInfo> getColumnList() {
-//
-//	    List<DtoFieldInfo> fields = new ArrayList<>();
-//	    for (int row = POS_DATA_START_ROW_JAVA; hasRow(row); row++) {
-//
-//	    	// Noの項目がない場合、読込み終了する
-//		    Cell noCell = getCell(row + 1, POS_FIELD_NO_COL);
-//		    if (noCell == null) {
-//		    	break;
-//		    }
-//
-//		    String fieldName = getCell(row + 1, POS_FIELD_NAME_COL).getStringCellValue();
-//		    String fieldClassName = getCell(row + 1, POS_FIELD_CLASS_NAME_COL).getStringCellValue();
-//		    int level = (int) ExcelUtils.getExcelValueForDto(
-//		    						getCell(row + 1, POS_FIELD_LEVEL_COL), "int");
-//
-//		    DtoFieldInfo dtoFieldInfo = new DtoFieldInfo();
-//		    dtoFieldInfo.setFieldName(fieldName);
-//		    dtoFieldInfo.setFieldClassName(fieldClassName);
-//		    dtoFieldInfo.setLevel(level);
-//		    fields.add(dtoFieldInfo);
-//	    }
-//	    fields.stream().forEach(s -> System.out.println(s));
-//	    return fields;
-//	}
-
 }

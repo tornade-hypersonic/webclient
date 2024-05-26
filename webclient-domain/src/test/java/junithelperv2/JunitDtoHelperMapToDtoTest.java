@@ -354,8 +354,5 @@ public class JunitDtoHelperMapToDtoTest {
 
 	public String convertDateTimeToString(LocalDateTime dateTime) {
 		return Utils.convertDateTimeToString(dateTime);
-//    	String string = dateTime.toString("yyyy/MM/dd HH:mm:ss.SSS");
-//    	System.out.println(string);
-//    	return string;
 	}
 }

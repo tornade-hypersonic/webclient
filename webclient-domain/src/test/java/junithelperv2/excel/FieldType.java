@@ -1,5 +1,8 @@
 package junithelperv2.excel;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public enum FieldType {
 
 	// 数値とDTO以外のクラス
@@ -17,6 +20,7 @@ public enum FieldType {
 	PRIMITIVE_LONG("long"),
 	PRIMITIVE_FLOAT("float");
 
+	private static final Logger logger = LoggerFactory.getLogger(FieldType.class);
 	private String fieldType;
 	private FieldType(String fieldType) {
 		this.fieldType = fieldType;
@@ -66,7 +70,7 @@ public enum FieldType {
 			}
 		}
 //		throw new IllegalArgumentException("該当するenumがありません。 [" + fieldClassName + "]");
-		System.out.println(methodName + " 該当するenumがありません。 [" + fieldClassName + "]");
+		logger.warn(methodName + " 該当するenumがありません。 [" + fieldClassName + "]");
 		return null;
 	}
 

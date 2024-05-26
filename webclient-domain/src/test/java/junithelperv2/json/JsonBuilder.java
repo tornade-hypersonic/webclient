@@ -1,4 +1,4 @@
-package junithelperv2;
+package junithelperv2.json;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import junithelperv2.excel.ExcelUtils;
 
@@ -21,6 +23,8 @@ import junithelperv2.excel.ExcelUtils;
  */
 public class JsonBuilder {
 
+	private static final Logger logger = LoggerFactory.getLogger(JsonBuilder.class);
+	
 	private Map<String, Object> jsonMap;
     private Deque<Map<String, Object>> mapStack;
     private Deque<List<Object>> listStack;
@@ -163,7 +167,9 @@ public class JsonBuilder {
 	public String toJson() {
 		StringBuilder json = new StringBuilder();
 		appendMap(this.jsonMap, json, 0);
-		return json.toString();
+		String jsonString = json.toString();
+    	logger.info("★JSON★" + jsonString);
+		return jsonString;
 	}
 	
 	/**

@@ -1,4 +1,4 @@
-package junithelperv2;
+package junithelperv2.json;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,10 +13,10 @@ public class JsonHolder {
 
 	private Map<String, String> jsonMap = new HashMap<>();
 	
-	private static final String KEY_DELIMITER = "\\u000b";
+	private static final String KEY_DELIMITER = "\\v";
 	
 	public void put(String sheetName, String testNo, String tuban, String json) {
-		String key = StringUtils.joinWith("\\v", sheetName, testNo, tuban);
+		String key = StringUtils.joinWith(KEY_DELIMITER, sheetName, testNo, tuban);
 		jsonMap.put(key, json);
 	}
 	
@@ -25,8 +25,4 @@ public class JsonHolder {
 		return jsonMap.get(key);
 	}
 	
-//	public static void main(String[] args) {
-//		String key = StringUtils.joinWith(KEY_DELIMITER, "aaa", "bbb", "ccc");
-//		System.out.println(key);
-//	}
 }

@@ -3,12 +3,15 @@ package junithelperv2.excel;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import junithelperv2.Utils;
 import junithelperv2.exceldata.DtoDataTestNo;
@@ -18,20 +21,22 @@ import junithelperv2.exceldata.SheetData;
 
 public class ExcelSheetDataCreater {
 
+	private static final Logger logger = LoggerFactory.getLogger(ExcelSheetDataCreater.class);
+	
 	public static void main(String[] args) throws Exception {
 
 		// Excelファイルへアクセス
 		String path = "data/test/junithelperv2/ContractDto.xlsx";
 		Workbook excel = WorkbookFactory.create(new File(path));
-		System.out.println(excel);
+		logger.debug(Objects.toString(excel));
 
 		int numberOfSheets = excel.getNumberOfSheets();
-		System.out.println(numberOfSheets);
+		logger.debug(Objects.toString(numberOfSheets));
 
 	    // シート名を取得
 	    ExcelSheetDataCreater creater = new ExcelSheetDataCreater(excel.getSheet("Sheet1"));
 	    SheetData sheetData = creater.createSheetData();
-	    System.out.println(sheetData);
+	    logger.debug(Objects.toString(sheetData));
 	}
 
 	private ExcelSheetWrapper sheet;
@@ -57,12 +62,12 @@ public class ExcelSheetDataCreater {
 		    sheetData.setClassName(dtoClassName);
 		    if (StringUtils.isEmpty(dtoClassName)) {
 				// クラス名が存在しない場合、当該シートは無効とする
-		    	System.out.println("クラス名が定義されてないシート「" + sheet.getSheetName() + "」" );
+		    	logger.warn("クラス名が定義されてないシート「" + sheet.getSheetName() + "」" );
 		    	return null;
 		    }
 		} catch (Exception e) {
 			// 例外発生時、当該シートは無効とする
-			System.out.println(e.getMessage() + "「" + sheet.getSheetName() + "」");
+			logger.error(e.getMessage() + "「" + sheet.getSheetName() + "」");
 			return null;
 		}
 
@@ -71,10 +76,7 @@ public class ExcelSheetDataCreater {
 			return sheetData;
 		}
 
-	    // 全データ格納用マップ
-//	    Map<String, Map<String, List<List<Cell>>>> dtoDatas = new LinkedHashMap<>();
-//	    Map<String, List<List<Cell>>> dtoData = new LinkedHashMap<>();
-	    
+	    // 全データ格納用
 	    DtoDataTestNo dtoDataTestNo = new DtoDataTestNo();
 	    DtoDataTuban dtoDataTuban = new DtoDataTuban();
 
@@ -97,8 +99,6 @@ public class ExcelSheetDataCreater {
 		    // 試験Noが異なる場合、通番Mapを初期化
 		    if (!testNo.equals(preTestNo)) {
 		    	preTestNo = testNo;
-//		    	dtoData = new HashMap<>();
-//		    	dtoDatas.put(testNo, dtoData);
 		    	dtoDataTuban = new DtoDataTuban();
 		    	dtoDataTestNo.put(testNo, dtoDataTuban);
 		    	preTuban = "";
@@ -109,7 +109,6 @@ public class ExcelSheetDataCreater {
 		    	tubanList = new ArrayList<List<Cell>>();
 		    }
 		    tubanList.add(cells);
-//		    dtoData.put(tuban, tubanList);
 		    dtoDataTuban.put(tuban, tubanList);
 
 		    // 行でループする
@@ -118,23 +117,23 @@ public class ExcelSheetDataCreater {
 			    // セルの値を取得する
 			    Cell cell = sheet.getCellPoi(rowCnt, colCnt);
 			    cells.add(cell);
-			    System.out.println(cell.toString());
+			    logger.debug(cell.toString());
 		    	if (sheet.getRow(rowCnt + 1) == null) {
-			    	System.out.println("行ループ終了");
+		    		logger.debug("行ループ終了");
 			    	break;
 		    	}
 		    	rowCnt++;
 		    }
 		    // 次の列のセルがなかったら終了する
 		    if (sheet.getTestNoRow().getCell(colCnt + 1) == null) {
-		    	System.out.println("列ループ終了");
+		    	logger.debug("列ループ終了");
 		    	break;
 		    }
 
 	    	colCnt++;
 	    }
 	    sheetData.setDtoDatas(dtoDataTestNo);
-	    System.out.println("★ dtoDatas=" + dtoDataTestNo);
+	    logger.debug("★ dtoDatas=" + dtoDataTestNo);
 
 	    return sheetData;
 
@@ -143,8 +142,6 @@ public class ExcelSheetDataCreater {
 	private void loadMapData(SheetData sheetData) {
 
 	    // 全データ格納用マップ
-//	    Map<String, Map<String, List<List<Cell>>>> dtoDatas = new LinkedHashMap<>();
-//	    Map<String, List<List<Cell>>> dtoData = new LinkedHashMap<>();
 	    DtoDataTestNo dtoDataTestNo = new DtoDataTestNo();
 	    DtoDataTuban dtoDataTuban = new DtoDataTuban();
 
@@ -193,21 +190,21 @@ public class ExcelSheetDataCreater {
 			    valCells.add(valCell);
 		    	if (sheet.getRow(rowCnt + 1) == null ||
 		    			StringUtils.isEmpty(sheet.getRow(rowCnt + 1).getCell(colCnt).toString())) {
-			    	System.out.println("行ループ終了");
+		    		logger.debug("行ループ終了");
 			    	break;
 		    	}
 		    	rowCnt++;
 		    }
 		    // 次の列のセルがなかったら終了する
 		    if (sheet.getTestNoRow().getCell(colCnt + 2) == null) {
-		    	System.out.println("列ループ終了");
+		    	logger.debug("列ループ終了");
 		    	break;
 		    }
 
 	    	colCnt = colCnt + 2;
 	    }
 	    sheetData.setDtoDatas(dtoDataTestNo);
-	    System.out.println("★ Map dtoDatas=" + dtoDataTestNo);
+	    logger.debug("★ Map dtoDatas=" + dtoDataTestNo);
 
 	}
 
@@ -234,7 +231,7 @@ public class ExcelSheetDataCreater {
 		    dtoFieldInfo.setLevel(level);
 		    fields.add(dtoFieldInfo);
 	    }
-	    fields.stream().forEach(s -> System.out.println(s));
+	    fields.stream().forEach(s -> logger.debug(Objects.toString(s)));
 	    return fields;
 	}
 
