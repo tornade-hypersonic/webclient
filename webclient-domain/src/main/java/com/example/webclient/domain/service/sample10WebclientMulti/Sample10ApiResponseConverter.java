@@ -72,6 +72,7 @@ public class Sample10ApiResponseConverter {
 	
 	private Sample10Entity convertConnectError(Sample10Entity request) {
 		
+		// Mapperに委譲するのがいいかもしれないが、とりあえず同じ処理をしておく
 		if (request instanceof Sample10System1ListRequestEntity) {
 			Sample10System1ListResponseEntity responseEntity = new Sample10System1ListResponseEntity();
 			responseEntity.setResult("NG");

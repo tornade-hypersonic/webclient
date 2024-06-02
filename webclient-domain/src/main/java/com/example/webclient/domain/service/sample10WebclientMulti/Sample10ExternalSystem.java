@@ -25,6 +25,13 @@ public class Sample10ExternalSystem {
 	@Inject
 	private Sample10ApiResponseConverter responseConverter;
 	
+	public Sample10Entity callApi(Sample10Entity requestEntity) {
+		CompletableFuture completableFuture = callApiAsync(requestEntity);
+		Sample10Entity responseEntity = responseConverter.convert(completableFuture, requestEntity);
+		return responseEntity;
+	}
+	
+	
 	public Sample10Entity[] callMultiApi(Sample10Entity... requestEntities) {
 		
 		// 非同期通信を実行

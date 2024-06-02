@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.example.webclient.domain.service.sample10WebclientMulti.apirepository.Sample10System2RepositoryImpl;
 import com.example.webclient.domain.service.sample10WebclientMulti.entity.Sample10Entity;
 import com.example.webclient.domain.service.sample10WebclientMulti.entity.system1.Sample10System1DetailRequestEntity;
 import com.example.webclient.domain.service.sample10WebclientMulti.entity.system1.Sample10System1ListRequestEntity;
@@ -22,10 +21,11 @@ public class Sample10ServiceImpl implements Sample10Service {
 	
 	@Inject
     private Sample10ExternalSystem externalSystem;
-	@Inject
-    private Sample10System2RepositoryImpl sample10System2Repository;
 
     public String getDataFromExternalSystems() {
+    	
+    	Sample10System1ListResponseEntity callApi = (Sample10System1ListResponseEntity) externalSystem.callApi(new Sample10System1ListRequestEntity());
+    	logger.debug(callApi.getResult());
 
     	Sample10System1ListRequestEntity system1ListRequestEntity = new Sample10System1ListRequestEntity();
     	Sample10System1DetailRequestEntity system1DetailRequestEntity = new Sample10System1DetailRequestEntity();
@@ -39,7 +39,5 @@ public class Sample10ServiceImpl implements Sample10Service {
 
     	return sys1ListRes.getResult() + "\n" + sys2ListRes.getResult();
     };
-    
-    
     
 }
