@@ -50,7 +50,7 @@ public class Sample10System2RepositoryImpl implements Sample10System2Repository 
 	public CompletableFuture<ResponseEntity<String>> callAsyncApiSystem2List(Sample10System2ListRequestEntity requestEntity) {
 		logger.debug("callAsyncApiSystem2List-1 " + Thread.currentThread().getName());
         return sample10WebClientSystem2.get()
-                .uri("/8")
+                .uri("?id=8")
                 .retrieve()
                 .toEntity(String.class)
                 .toFuture();
@@ -59,7 +59,7 @@ public class Sample10System2RepositoryImpl implements Sample10System2Repository 
 	@Override
 	public CompletableFuture<ResponseEntity<String>> callAsyncApiSystem2Detail(Sample10System2DetailRequestEntity requestEntity) {
         return sample10WebClientSystem2.get()
-                .uri("/9")
+                .uri("?id=9")
                 .retrieve()
                 .toEntity(String.class)
                 .toFuture();

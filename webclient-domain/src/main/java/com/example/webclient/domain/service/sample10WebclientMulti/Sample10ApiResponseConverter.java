@@ -3,6 +3,8 @@ package com.example.webclient.domain.service.sample10WebclientMulti;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +27,8 @@ import jakarta.inject.Inject;
 @Component
 public class Sample10ApiResponseConverter {
 
+	private static final Logger logger = LoggerFactory.getLogger(Sample10ApiResponseConverter.class);
+	
 	@Inject
 	private Sample10System1ListResponseMapper system1ListResponseMapper;
 	@Inject
@@ -34,13 +38,15 @@ public class Sample10ApiResponseConverter {
 	@Inject
 	private Sample10System2DetailResponseMapper system2DetailResponseMapper;
 	
-	public Sample10Entity convert(CompletableFuture completableFuture, Sample10Entity request) {
+	public Sample10Entity convert(@SuppressWarnings("rawtypes") CompletableFuture completableFuture, Sample10Entity request) {
 
 		Object response = null;
 		try {
+			// ※警告の消し方がわからない。。。
 			response = ((ResponseEntity) completableFuture.get()).getBody();
 		} catch (InterruptedException | ExecutionException e) {
 			// 通信障害とみなす
+			logger.error("通信障害", e);
 			return convertConnectError(request);
 		}
 		

@@ -50,7 +50,7 @@ public class Sample10System1RepositoryImpl implements Sample10System1Repository 
 	public CompletableFuture<ResponseEntity<String>> callAsyncApiSystem1List(Sample10System1ListRequestEntity requestEntity) {
 		logger.debug("callAsyncApiSystem1List-1 " + Thread.currentThread().getName());
         return sample10WebClientSystem1.get()
-                .uri("/1")
+                .uri("?id=1")
                 .retrieve()
                 .toEntity(String.class)
                 .toFuture();
@@ -58,7 +58,7 @@ public class Sample10System1RepositoryImpl implements Sample10System1Repository 
 
 	public CompletableFuture<ResponseEntity<String>> callAsyncApiSystem1Detail(Sample10System1DetailRequestEntity requestEntity) {
         return sample10WebClientSystem1.get()
-                .uri("/2")
+                .uri("?id=2")
                 .retrieve()
                 .toEntity(String.class)
                 .toFuture();

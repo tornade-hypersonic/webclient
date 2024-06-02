@@ -7,6 +7,7 @@ import com.example.webclient.domain.service.sample10WebclientMulti.entity.system
 @Component
 public class Sample10System1ListResponseMapper {
 
+	// 本来は、XMLの各項目をEntityにマッピングする
 	public Sample10System1ListResponseEntity map(String xml) {
 		Sample10System1ListResponseEntity responseEntity = new Sample10System1ListResponseEntity();
 		responseEntity.setResult(xml);;
