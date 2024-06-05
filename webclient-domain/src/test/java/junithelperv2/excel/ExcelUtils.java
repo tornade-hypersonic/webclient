@@ -101,20 +101,26 @@ public class ExcelUtils {
 				}
 				String valueDouble = Double.toString(cell.getNumericCellValue());
 
-				FieldType type = FieldType.getNumberInstance(fieldClassName);
+//				FieldType type = FieldType.getNumberInstance(fieldClassName);
+				FieldType type = FieldType.getNumberPrimitiveInstance(fieldClassName);
 
 				switch (type) {
 				case INTEGER:
-			    	return Integer.parseInt(valueDouble);
+				case PRIMITIVE_INT:
+//			    	return Integer.parseInt(valueDouble);
+					return (int) cell.getNumericCellValue();
 
 				case LONG:
+				case PRIMITIVE_LONG:
 			    	return Long.parseLong(valueDouble);
 
 				case FLOAT:
+				case PRIMITIVE_FLOAT:
 			    	return Float.parseFloat(valueDouble);
 
 				default:
-					throw new CellOperationException("JunitHelperのサポート対象外", cell, valueDouble);
+//					throw new CellOperationException("JunitHelperのサポート対象外", cell, valueDouble);
+			    	return cell.getNumericCellValue();
 				}
 
 			default:

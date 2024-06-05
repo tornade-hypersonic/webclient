@@ -68,6 +68,7 @@ public class ExcelSheetDataCreater {
 		} catch (Exception e) {
 			// 例外発生時、当該シートは無効とする
 			logger.error(e.getMessage() + "「" + sheet.getSheetName() + "」");
+			logger.error("", e);
 			return null;
 		}
 
@@ -224,6 +225,9 @@ public class ExcelSheetDataCreater {
 		    String fieldClassName = sheet.getCell(row + 1, ExcelConst.POS_FIELD_CLASS_NAME_COL).getStringCellValue();
 		    int level = (int) ExcelUtils.getExcelValueForDto(
 		    		sheet.getCell(row + 1, ExcelConst.POS_FIELD_LEVEL_COL), "int");
+//		    String levelStr = (String) ExcelUtils.getExcelValue(
+//		    		sheet.getCell(row + 1, ExcelConst.POS_FIELD_LEVEL_COL)).replaceAll("\\..*", "");
+//		    Integer level = Integer.valueOf(levelStr);
 
 		    DtoFieldInfo dtoFieldInfo = new DtoFieldInfo();
 		    dtoFieldInfo.setFieldName(fieldName);
