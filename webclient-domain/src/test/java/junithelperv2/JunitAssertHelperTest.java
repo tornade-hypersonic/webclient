@@ -3,8 +3,8 @@ package junithelperv2;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import junithelperv2.target.AddressDto;
-import junithelperv2.target.AssertDummy;
+import junithelperv2.targetdto.AddressDto;
+import junithelperv2.targetdto.AssertDummy;
 
 public class JunitAssertHelperTest {
 

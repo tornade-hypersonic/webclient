@@ -24,8 +24,8 @@ import junithelperv2.excel.ExcelUtils;
 import junithelperv2.exceldata.DtoFieldInfo;
 import junithelperv2.exceldata.ExcelData;
 import junithelperv2.exceldata.SheetData;
-import junithelperv2.target.AddressDto;
-import junithelperv2.target.AssertDummy;
+import junithelperv2.targetdto.AddressDto;
+import junithelperv2.targetdto.AssertDummy;
 
 public class JunitAssertHelper {
 

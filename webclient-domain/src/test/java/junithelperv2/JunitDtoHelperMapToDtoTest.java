@@ -7,9 +7,9 @@ import java.util.List;
 
 import org.junit.Test;
 
-import junithelperv2.target.AddressDto;
-import junithelperv2.target.ContractDto;
-import junithelperv2.target.ServiceInfo;
+import junithelperv2.targetdto.AddressDto;
+import junithelperv2.targetdto.ContractDto;
+import junithelperv2.targetdto.ServiceInfo;
 
 
 public class JunitDtoHelperMapToDtoTest {
