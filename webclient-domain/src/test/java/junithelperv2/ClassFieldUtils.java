@@ -9,7 +9,7 @@ import java.util.Objects;
 
 import junithelperv2.Enums.PropertPattern;
 
-public class ClassUtils {
+public class ClassFieldUtils {
 
 	private static Map<Class<?>, Map<String, Field>> classInfoMap = new HashMap<>();
 

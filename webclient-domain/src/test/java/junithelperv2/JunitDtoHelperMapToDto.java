@@ -213,7 +213,7 @@ public class JunitDtoHelperMapToDto {
 			DtoFieldInfo fieldInfo = fields.get(itemIndex);
 		    
 		    // 設定対象のField
-			Field field = ClassUtils.getField(targetDtoClass, fieldInfo.getFieldName());
+			Field field = ClassFieldUtils.getField(targetDtoClass, fieldInfo.getFieldName());
 			if (field == null) {
 				logger.debug(json.toJson());
 				throw new RuntimeException(String.format("field==null, i=%s, name=%s", itemIndex, fieldInfo.getFieldName()));
@@ -332,7 +332,7 @@ public class JunitDtoHelperMapToDto {
 			PropertPattern pattern
 			) {
 		
-	    Class<?> targetDtoClass = ClassUtils.getClass(field, pattern);
+	    Class<?> targetDtoClass = ClassFieldUtils.getClass(field, pattern);
 	    
 		// JSON追加の対象数
 		int appendLineCount = 0;

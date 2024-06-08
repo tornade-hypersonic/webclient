@@ -106,7 +106,7 @@ public class JunitAssertHelper {
 			    Object targetDto = dtoStack.peek();
 			    
 //			    Field field = ClassUtils.loadFiled(targetDto).get(fieldName);
-			    Field field = ClassUtils.getField(targetDto.getClass(), fieldName);
+			    Field field = ClassFieldUtils.getField(targetDto.getClass(), fieldName);
 			    if (Objects.isNull(field)) {
 			    	throw new CellOperationException("フィールド名がDTOに存在しない可能性があります", cell, cellValue);
 			    }
@@ -307,7 +307,7 @@ public class JunitAssertHelper {
 			Object actual = actualList.get(i);
 			Cell expectedCell = renbanList.get(i).get(itemIndex);
 
-		    String listElementType = ClassUtils.getClassNameByListElement(field);
+		    String listElementType = ClassFieldUtils.getClassNameByListElement(field);
 
 		    // 検証予測値を取得
 			Object expected = ExcelUtils.getExcelValueForDto(expectedCell, listElementType);
@@ -327,7 +327,7 @@ public class JunitAssertHelper {
 			List<List<Cell>> renbanList,
 			int itemIndex) {
 
-	    String arrayElementType = ClassUtils.getClassNameByArrayElement(field);
+	    String arrayElementType = ClassFieldUtils.getClassNameByArrayElement(field);
 	    String fieldName = fieldInfo.getFieldName();
 
     	// DTOに設定された配列を取得する
