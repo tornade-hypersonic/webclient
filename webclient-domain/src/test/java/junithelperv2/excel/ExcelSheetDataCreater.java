@@ -67,7 +67,8 @@ public class ExcelSheetDataCreater {
 		    }
 		} catch (Exception e) {
 			// 例外発生時、当該シートは無効とする
-			logger.error(e.getMessage() + "「" + sheet.getSheetName() + "」");
+//			logger.error(e.getMessage() + "「" + sheet.getSheetName() + "」");
+			logger.error("Excelシートが無効 シート名=[{}]", sheet.getSheetName());
 			logger.error("", e);
 			return null;
 		}

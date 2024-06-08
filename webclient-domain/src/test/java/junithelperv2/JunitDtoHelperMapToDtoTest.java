@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import junithelperv2.targetdto.AddressDto;
 import junithelperv2.targetdto.ContractDto;
+import junithelperv2.targetdto.Item;
 import junithelperv2.targetdto.ServiceInfo;
 
 
@@ -354,5 +355,20 @@ public class JunitDtoHelperMapToDtoTest {
 
 	public String convertDateTimeToString(LocalDateTime dateTime) {
 		return Utils.convertDateTimeToString(dateTime);
+	}
+	
+	@Test
+	public void itemTest() {
+		JunitDtoHelperMapToDto mapper = new JunitDtoHelperMapToDto();
+		DtoAll dtoAll = mapper.createDtoFromExcel("data/test/junithelperv2/Item.xlsx");
+		Item item = (Item) dtoAll.getDto("Sheet1", "1-1", "1");
+		assertEquals("val1", item.getItemParent1());
+		assertEquals("val2", item.getItemParent2());
+		assertEquals("val3", item.getItemParent3());
+		assertEquals("val4", item.getItemParent4());
+		assertEquals("val5", item.getItem1());
+		assertEquals("val6", item.getItem2());
+		assertEquals("val7", item.getItem3());
+		
 	}
 }

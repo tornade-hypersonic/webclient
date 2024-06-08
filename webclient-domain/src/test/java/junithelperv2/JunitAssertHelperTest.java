@@ -42,5 +42,17 @@ public class JunitAssertHelperTest {
 		asserter.assertDto(actual, "Sheet1", "1-2", "1");
 		
 	}
+	
+	@Test
+	public void assertItem() {
+		
+		JunitDtoHelperMapToDto dtoHelper = new JunitDtoHelperMapToDto();
+		DtoAll actualDtos = dtoHelper.createDtoFromExcel("data/test/junithelperv2/Item.xlsx");
+		
+		JunitAssertHelper asserter = new JunitAssertHelper("data/test/junithelperv2/Item.xlsx");
+		
+		Object actual = actualDtos.getDto("Sheet1", "1-1", "1");
+		asserter.assertDto(actual, "Sheet1", "1-1", "1");
+	}
 
 }

@@ -146,14 +146,11 @@ public class JunitDtoHelperMapToDto {
 				    // DTOを作成する
 			    	Object dto = Utils.newInstance(sheetData.getClassName());
 
-				    // Field情報をロード
-				    Map<String,Field> classFiledMap = ClassUtils.loadFiled(sheetData.getClassName());
-
 			    	// Mapを定義したシートの場合、Map固有の設定処理を行う
 				    if (dto instanceof Map) {
 				    	setValueMap(dto, tubanEntry.getValue(), fields);
 				    } else {
-					    setValue(dtoAll, excelData, fields, classFiledMap, tubanEntry.getValue(), 0);
+					    setValue(dtoAll, excelData, fields, dto.getClass(), tubanEntry.getValue(), 0);
 				    }
 
 				    // JSONからDTOへ変換
@@ -200,7 +197,7 @@ public class JunitDtoHelperMapToDto {
 			DtoAll dtoAll,
 			ExcelData excelData,
 			List<DtoFieldInfo> fields,
-			Map<String,Field> classFiledMap,
+			Class<?> targetDtoClass,
 			List<List<Cell>> renbanList,
 			int currentLevel
 			) {
@@ -216,7 +213,7 @@ public class JunitDtoHelperMapToDto {
 			DtoFieldInfo fieldInfo = fields.get(itemIndex);
 		    
 		    // 設定対象のField
-			Field field = classFiledMap.get(fieldInfo.getFieldName());
+			Field field = ClassUtils.getField(targetDtoClass, fieldInfo.getFieldName());
 			if (field == null) {
 				logger.debug(json.toJson());
 				throw new RuntimeException(String.format("field==null, i=%s, name=%s", itemIndex, fieldInfo.getFieldName()));
@@ -335,7 +332,7 @@ public class JunitDtoHelperMapToDto {
 			PropertPattern pattern
 			) {
 		
-	    Map<String,Field> classFiledMap = ClassUtils.loadFiledByField(field, pattern);
+	    Class<?> targetDtoClass = ClassUtils.getClass(field, pattern);
 	    
 		// JSON追加の対象数
 		int appendLineCount = 0;
@@ -387,7 +384,7 @@ public class JunitDtoHelperMapToDto {
 		    appendLineCount = wCells.size();
 
 		    // 値の設定処理
-		    setValue(dtoAll, excelData, wFields, classFiledMap, wRenbanList, parentLevel);
+		    setValue(dtoAll, excelData, wFields, targetDtoClass, wRenbanList, parentLevel);
 
 		    if (pattern.isDtoArray()) {
 		    	// DTO配列の場合、連想配列を除去
