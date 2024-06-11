@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.ResolverStyle;
@@ -12,7 +11,6 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.ReflectionUtils;
@@ -145,23 +143,14 @@ public class Utils {
 
 	/** DTOのフィールドの値を取得する **/
 	public static Object getFieldObject(Object dto, String fieldName) {
-
-    	Method method = ReflectionUtils.findMethod(
-    			dto.getClass(),
-    			"get" + StringUtils.left(fieldName, 1).toUpperCase() + fieldName.substring(1));
-
-    	if (method == null) {
-    		method = ReflectionUtils.findMethod(
-        			dto.getClass(),
-        			"is" + StringUtils.left(fieldName, 1).toUpperCase() + fieldName.substring(1));
-    	}
-    	if (method == null) {
-    		throw new RuntimeException(
-    				String.format("DTOにないフィールド名が指定されました クラス名=[%s], フィールド名=[%s]", dto.getClass().getTypeName(), fieldName));
-    	}
-
-    	method.setAccessible(true);
-    	return ReflectionUtils.invokeMethod(method, dto);
+		
+		Field field = ClassFieldUtils.getField(dto.getClass(), fieldName);
+		field.setAccessible(true);
+		try {
+			return  field.get(dto);
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 
