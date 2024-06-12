@@ -6,23 +6,10 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class SheetData {
 
-	/**
-	 * String[0]：DTOの変数の物理名
-	 * String[1]：DTOの変数のクラス名
-	 * String[2]：DTOの設定値で別シートを参照するか
-	 */
+	/** DTO定義情報 **/
 	private List<DtoFieldInfo> dtoFieldInfo;
 
-	/**
-	 * Map {
-	 *   key  ：試験No,
-	 *   value：Map {
-	 *     key  ：通番,
-	 *     value：データリスト [cells, cells, ...]
-	 *   }
-	 * }
-	 */
-//	private Map<String, Map<String, List<List<Cell>>>> dtoDatas;
+	/** 試験No単位に保持するデータ **/
 	private DtoDataTestNo dataTestNo;
 
 	/** クラス名 **/
@@ -38,13 +25,6 @@ public class SheetData {
 	public void setDtoFieldInfo(List<DtoFieldInfo> dtoFieldInfo) {
 		this.dtoFieldInfo = dtoFieldInfo;
 	}
-	//
-//	public Map<String, Map<String, List<List<Cell>>>> getDtoDatas() {
-//		return dtoDatas;
-//	}
-//	public void setDtoDatas(Map<String, Map<String, List<List<Cell>>>> dtoDatas) {
-//		this.dtoDatas = dtoDatas;
-//	}
 	public DtoDataTestNo getDtoDatas() {
 		return dataTestNo;
 	}

@@ -12,11 +12,8 @@ public class DtoDataTuban {
 
 	/**
 	 * Map {
-	 *   key  ：試験No,
-	 *   value：Map {
-	 *     key  ：通番,
-	 *     value：データリスト [cells, cells, ...]
-	 *   }
+	 *   key  ：通番,
+	 *   value：データリスト [cells, cells, ...]
 	 * }
 	 */
 	private Map<String, List<List<Cell>>> dtoDataTubanMap  = new LinkedHashMap<>();
