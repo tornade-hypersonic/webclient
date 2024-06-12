@@ -105,7 +105,6 @@ public class JunitAssertHelper {
 			    // 設定対象のDTO
 			    Object targetDto = dtoStack.peek();
 			    
-//			    Field field = ClassUtils.loadFiled(targetDto).get(fieldName);
 			    Field field = ClassFieldUtils.getField(targetDto.getClass(), fieldName);
 			    if (Objects.isNull(field)) {
 			    	throw new CellOperationException("フィールド名がDTOに存在しない可能性があります", cell, cellValue);
@@ -258,8 +257,6 @@ public class JunitAssertHelper {
 		// Mapのシートを取得
     	SheetData sheetData = excelData.getSheetData(anotherSheetName);
 
-//		Map<String, Map<String, List<List<Cell>>>> datas = sheetData.getDtoDatas();
-//		List<List<Cell>> renbanList = datas.get(anotherTestNo).get(anotherTuban);
 		List<List<Cell>> renbanList = sheetData.getDtoDatas().get(anotherTestNo).get(anotherTuban);
 
 		// Mapシートは連番リストは2つのみ
