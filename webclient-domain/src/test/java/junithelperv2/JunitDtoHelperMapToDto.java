@@ -224,7 +224,7 @@ public class JunitDtoHelperMapToDto {
 		    	logger.debug("debug");
 		    }
 
-		    if (cellValue.matches(ANOTHER_SHEET_REGEX)) {
+		    if (cellValue != null && cellValue.matches(ANOTHER_SHEET_REGEX)) {
 		    	
 		    	if (field.getType().isArray() ||
 		    			List.class.isAssignableFrom(field.getType())) {
@@ -353,13 +353,6 @@ public class JunitDtoHelperMapToDto {
 	    	
 	    	List<Cell> cells = renbanList.get(renbanCnt);
 	    	
-	    	// 親階層に [new] が設定されてない場合、その連番はスキップする
-//	    	Cell parentCell = cells.get(itemIndex);
-//	    	String value = ExcelUtils.getExcelValue(parentCell);
-//	    	if ("[new]".equals(value) == false) {
-//	    		continue;
-//	    	}
-	    	
 		    if (pattern.isDtoArray()) {
 		    	// DTO配列の場合、連想配列をリストに登録
 		    	json.startAssociativeArrayAddList();
@@ -382,14 +375,7 @@ public class JunitDtoHelperMapToDto {
 		    first = false;
 		    
 		    // 設定値対象がすべて値なしの場合、データなしとみなす
-		    boolean empty = true;
-		    for (Cell wCell : wCells) {
-				if (wCell != null && ExcelUtils.getExcelValue(wCell) != null) {
-					empty = false;
-					break;
-				}
-			}
-		    if (empty) {
+		    if (isEmptyData(wCells)) {
 		    	continue;
 		    }
 		    
@@ -541,6 +527,19 @@ public class JunitDtoHelperMapToDto {
     	}
     	
 		return false;
+	}
+	
+    // 設定値対象がすべて値なしの場合、データなしとみなす
+	private boolean isEmptyData(List<Cell> wCells) {
+		
+	    boolean empty = true;
+	    for (Cell wCell : wCells) {
+			if (wCell != null && ExcelUtils.getExcelValue(wCell) != null) {
+				empty = false;
+				break;
+			}
+		}
+	    return empty;
 	}
 
 	/**

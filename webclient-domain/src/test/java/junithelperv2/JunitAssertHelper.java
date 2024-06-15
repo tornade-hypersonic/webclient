@@ -13,7 +13,6 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,12 +90,6 @@ public class JunitAssertHelper {
 			    	logger.debug("デバッグ用");
 			    }
 
-			    // セルに値がない場合
-			    if (StringUtils.isEmpty(cellValue)) {
-				    preLevel = level;   // 階層レベルを前回分として保持
-			    	continue;
-			    }
-
 			    // 階層レベルが下がった場合、スタックからDTOを一つ削除する
 			    if (preLevel > level) {
 			    	dtoStack.pop();
@@ -110,7 +103,7 @@ public class JunitAssertHelper {
 			    	throw new CellOperationException("フィールド名がDTOに存在しない可能性があります", cell, cellValue);
 			    }
 
-			    if (cellValue.matches(ANOTHER_SHEET_REGEX)) {
+			    if (cellValue != null && cellValue.matches(ANOTHER_SHEET_REGEX)) {
 					// 別シート参照のDTOを設定する場合
 	
 			    	if (field.getType().isArray()) {
@@ -148,20 +141,6 @@ public class JunitAssertHelper {
 				    	assertArray(targetDto, cell, fieldInfo, field, renbanList, itemIndex);
 			    	}
 			    	
-//			    	if ("[new]".equals(cellValue)) {
-//				    	// DTO配列の場合
-//			    		
-//		            	// 子階層のアサート 連番のデータもここで設定する
-//			    		int assertLineCount = appendRenbanItems(targetDto, fieldInfo, fields, field, renbanList, itemIndex);
-//				        // 子階層の行数をスキップ
-//				    	itemIndex = itemIndex + assertLineCount;
-//				    	
-//			    	} else {
-//			    		
-//				    	// 配列にプリミティブ相当の値を追加する場合
-//				    	assertArray(targetDto, cell, fieldInfo, field, renbanList, itemIndex);
-//			    	}
-
 			    } else if (List.class.isAssignableFrom(field.getType())) {
 			    	// リストの場合
 			    	
@@ -179,21 +158,6 @@ public class JunitAssertHelper {
 				    	assertList(targetDto, cell, fieldInfo, field, renbanList, itemIndex);
 			    	}
 			    	
-//			    	if ("[new]".equals(cellValue)) {
-//				    	// DTO配列の場合
-//			    		
-//		            	// 子階層のアサート 連番のデータもここで設定する
-//			    		int assertLineCount = appendRenbanItems(targetDto, fieldInfo, fields, field, renbanList, itemIndex);
-//				        // 子階層の行数をスキップ
-//				    	itemIndex = itemIndex + assertLineCount;
-//				    	
-//			    	} else {
-//			    		
-//				    	// Listにプリミティブ相当の値を追加する場合
-//				    	assertList(targetDto, cell, fieldInfo, field, renbanList, itemIndex);
-//			    	}
-
-//			    } else if ("[new]".equals(cellValue)) {
 			    } else if (isDtoArrayOrList(fields, itemIndex)) {
 				    // インスタンスを生成する場合
 			    	// ※リストと配列はその前のif文で処理される
@@ -442,13 +406,6 @@ public class JunitAssertHelper {
 	    for (int renbanCnt = 0; renbanCnt < renbanList.size(); renbanCnt++) {
 	    	
 	    	List<Cell> cells = renbanList.get(renbanCnt);
-	    	
-//	    	// 親階層に [new] が設定されてない場合、その連番はスキップする
-//	    	Cell parentCell = cells.get(itemIndex);
-//	    	String value = ExcelUtils.getExcelValue(parentCell);
-//	    	if ("[new]".equals(value) == false) {
-//	    		continue;
-//	    	}
 	    	
 			boolean first = true;
 		    List<Cell> wCells = new ArrayList<>();
