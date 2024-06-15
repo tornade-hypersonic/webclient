@@ -224,7 +224,7 @@ public class JunitDtoHelperMapToDto {
 		    	logger.debug("debug");
 		    }
 
-		    if (cellValue.matches(ANOTHER_SHEET_REGEX)) {
+		    if (cellValue != null && cellValue.matches(ANOTHER_SHEET_REGEX)) {
 		    	
 		    	if (field.getType().isArray() ||
 		    			List.class.isAssignableFrom(field.getType())) {
@@ -244,7 +244,7 @@ public class JunitDtoHelperMapToDto {
 				// 配列の場合
 		    	
 		    	// DTO配列の場合
-		    	if ("[new]".equals(cellValue)) {
+		    	if (isDtoArrayOrList(fields, itemIndex)) {
 		    		
 	            	// 子階層の値を設定 連番のデータもここで設定する
 			        int assertLineCount = appendRenbanItems(
@@ -262,7 +262,7 @@ public class JunitDtoHelperMapToDto {
             } else if (List.class.isAssignableFrom(field.getType())) {
 				// リストの場合
             	
-		    	if ("[new]".equals(cellValue)) {
+		    	if (isDtoArrayOrList(fields, itemIndex)) {
 			    	// DTOリストの場合
 
 	            	// 子階層の値を設定 連番のデータもここで設定する
@@ -281,7 +281,7 @@ public class JunitDtoHelperMapToDto {
 				// Mapの場合、必ず別シート参照とするため、ここを通るときは設定値誤り
 		    	throw new CellOperationException("Mapフィールドの形式が誤っています。設定値を確認してください。", cell, cellValue);
 				
-            } else if ("[new]".equals(cellValue)) {
+            } else if (isDtoArrayOrList(fields, itemIndex)) {
 				// DTOの場合
             	
             	// 親階層のJSON編集
@@ -353,13 +353,6 @@ public class JunitDtoHelperMapToDto {
 	    	
 	    	List<Cell> cells = renbanList.get(renbanCnt);
 	    	
-	    	// 親階層に [new] が設定されてない場合、その連番はスキップする
-	    	Cell parentCell = cells.get(itemIndex);
-	    	String value = ExcelUtils.getExcelValue(parentCell);
-	    	if ("[new]".equals(value) == false) {
-	    		continue;
-	    	}
-	    	
 		    if (pattern.isDtoArray()) {
 		    	// DTO配列の場合、連想配列をリストに登録
 		    	json.startAssociativeArrayAddList();
@@ -380,6 +373,12 @@ public class JunitDtoHelperMapToDto {
 		    	wCells.add(cells.get(i));
 		    }
 		    first = false;
+		    
+		    // 設定値対象がすべて値なしの場合、データなしとみなす
+		    if (isEmptyData(wCells)) {
+		    	continue;
+		    }
+		    
 		    wRenbanList.add(wCells);
 		    appendLineCount = wCells.size();
 
@@ -469,7 +468,6 @@ public class JunitDtoHelperMapToDto {
 	    	
 	    	List<Cell> cells = renbanList.get(renbanCnt);
 	    	
-	    	// 親階層に [new] が設定されてない場合、その連番はスキップする
 	    	Cell cell = cells.get(itemIndex);
 	    	
 		    // 値の設定処理
@@ -509,6 +507,39 @@ public class JunitDtoHelperMapToDto {
 	 		
 		// DTO配列終了
 		json.closeArray();
+	}
+
+	/**
+	 * 現在のExcel行がDTOや配列に該当するか、判定する
+	 */
+	private boolean isDtoArrayOrList(List<DtoFieldInfo> fields, int itemIndex) {
+		
+		// 最終行の場合、配列orListではない
+		if (itemIndex == fields.size() - 1) {
+			return false;
+		}
+		
+		// 階層が変わる場合、配列orListと判定する
+    	DtoFieldInfo nextFieldInfo = fields.get(itemIndex + 1);
+    	DtoFieldInfo currentFieldInfo = fields.get(itemIndex);
+    	if (currentFieldInfo.getLevel() < nextFieldInfo.getLevel()) {
+    		return true;
+    	}
+    	
+		return false;
+	}
+	
+    // 設定値対象がすべて値なしの場合、データなしとみなす
+	private boolean isEmptyData(List<Cell> wCells) {
+		
+	    boolean empty = true;
+	    for (Cell wCell : wCells) {
+			if (wCell != null && ExcelUtils.getExcelValue(wCell) != null) {
+				empty = false;
+				break;
+			}
+		}
+	    return empty;
 	}
 
 	/**
