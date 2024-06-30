@@ -1,6 +1,9 @@
 package com.example.webclient.domain.service.sample10WebclientMulti;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 import org.springframework.stereotype.Component;
 
@@ -22,20 +25,28 @@ public class Sample10ApiExecutor {
 	@Inject
     private Sample10System2RepositoryImpl sample10System2Repository;
 	
-	@SuppressWarnings("rawtypes") // 警告の消し方がわからなかったので強制的に出ないようにした
-	public CompletableFuture callApiAsync(Sample10Entity requestEntity) {
-		
-		// リクエストEntityに合わせてAPIリポジトリを振り分ける
-		if (requestEntity instanceof Sample10System1ListRequestEntity) {
-			return sample10System1Repository.callAsyncApiSystem1List((Sample10System1ListRequestEntity) requestEntity);
-		} else if (requestEntity instanceof Sample10System1DetailRequestEntity) {
-			return sample10System1Repository.callAsyncApiSystem1Detail((Sample10System1DetailRequestEntity) requestEntity);
-		} else if (requestEntity instanceof Sample10System2ListRequestEntity) {
-			return sample10System2Repository.callAsyncApiSystem2List((Sample10System2ListRequestEntity) requestEntity);
-		} else if (requestEntity instanceof Sample10System2DetailRequestEntity) {
-			return sample10System2Repository.callAsyncApiSystem2Detail((Sample10System2DetailRequestEntity) requestEntity);
-		}
-		throw new RuntimeException("エンティティがありえない");
-		
+	
+	private final Map<Class<?>, Function<Sample10Entity, CompletableFuture<?>>> apiCallers = new HashMap<>();
+	
+	public Sample10ApiExecutor() {
+
+        apiCallers.put(Sample10System1ListRequestEntity.class, 
+            entity -> sample10System1Repository.callAsyncApiSystem1List((Sample10System1ListRequestEntity) entity));
+        apiCallers.put(Sample10System1DetailRequestEntity.class, 
+            entity -> sample10System1Repository.callAsyncApiSystem1Detail((Sample10System1DetailRequestEntity) entity));
+        apiCallers.put(Sample10System2ListRequestEntity.class, 
+            entity -> sample10System2Repository.callAsyncApiSystem2List((Sample10System2ListRequestEntity) entity));
+        apiCallers.put(Sample10System2DetailRequestEntity.class, 
+            entity -> sample10System2Repository.callAsyncApiSystem2Detail((Sample10System2DetailRequestEntity) entity));
 	}
+	
+    public CompletableFuture<?> callApiAsync(Sample10Entity requestEntity) {
+        Function<Sample10Entity, CompletableFuture<?>> apiCaller = apiCallers.get(requestEntity.getClass());
+
+        if (apiCaller != null) {
+            return apiCaller.apply(requestEntity);
+        } else {
+            throw new RuntimeException("エンティティがありえない");
+        }
+    }	
 }
